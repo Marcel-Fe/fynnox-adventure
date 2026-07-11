@@ -1,13 +1,17 @@
 import { useEffect } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { AdventureScene } from './game/AdventureScene'
-import { TouchControls } from './ui/TouchControls'
 import { Hud } from './ui/Hud'
+import { TouchControls } from './ui/TouchControls'
+import { MainMenu } from './ui/MainMenu'
+import { ResultScreen } from './ui/ResultScreen'
+import { RotateHint } from './ui/RotateHint'
 import { attachKeyboard } from './game/controls'
 import { player } from './game/playerState'
-import { FOREST_LEVEL } from './game/level'
+import { useGameStore } from './store/gameStore'
+import { getLevel } from './game/levels'
 
-// Strikte Seitenkamera: bleibt in Z/Y fest und folgt Fynnox nur in X (2,5D).
+// Strikte Seitenkamera: fest in Z/Y, folgt Fynnox nur in X (2,5D).
 function CameraFollow() {
   const { camera } = useThree()
   useFrame((_, delta) => {
@@ -18,23 +22,40 @@ function CameraFollow() {
   return null
 }
 
-export default function App() {
-  useEffect(() => attachKeyboard(), [])
+function GameView() {
+  const levelId = useGameStore((s) => s.levelId)
+  const runId = useGameStore((s) => s.runId)
+  const screen = useGameStore((s) => s.screen)
+  const level = getLevel(levelId)
 
   return (
     <>
       <Canvas
+        key={runId}
         shadows
         dpr={[1, 2]}
-        camera={{ position: [FOREST_LEVEL.startX, 4.6, 17], fov: 48, near: 0.1, far: 500 }}
+        camera={{ position: [level.startX, 4.6, 17], fov: 48, near: 0.1, far: 600 }}
         gl={{ antialias: true }}
       >
         <CameraFollow />
-        <AdventureScene world="forest" />
+        <AdventureScene level={level} />
       </Canvas>
 
       <Hud />
       <TouchControls />
+      {screen === 'result' && <ResultScreen />}
+    </>
+  )
+}
+
+export default function App() {
+  const screen = useGameStore((s) => s.screen)
+  useEffect(() => attachKeyboard(), [])
+
+  return (
+    <>
+      {screen === 'menu' ? <MainMenu /> : <GameView />}
+      <RotateHint />
     </>
   )
 }

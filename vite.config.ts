@@ -20,7 +20,7 @@ export default defineConfig({
         background_color: '#bcd6f0',
         display_override: ['fullscreen', 'standalone'],
         display: 'standalone',
-        orientation: 'any',
+        orientation: 'landscape',
         start_url: '/fynnox-adventure/',
         scope: '/fynnox-adventure/',
         icons: [

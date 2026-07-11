@@ -20,3 +20,22 @@ body,
 canvas {
   display: block;
 }
+
+button {
+  font-family: inherit;
+}
+
+/* Menü-Kachelreihe ohne sichtbare Scrollleiste */
+::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+}
+
+@keyframes fynnoxrotate {
+  0%, 100% { transform: rotate(-12deg); }
+  50% { transform: rotate(78deg); }
+}

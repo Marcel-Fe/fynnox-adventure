@@ -1,14 +1,14 @@
 // Eingabe-Singleton. Touch-Buttons und Tastatur schreiben hier hinein; der Player
-// liest die Werte je Frame. `jump` ist flankengetriggert (ein Sprung je Druck):
-// wird bei Tastendruck/Tap auf true gesetzt und vom Player nach dem Lesen wieder
-// auf false gesetzt.
+// liest je Frame. `jump` und `dash` sind flankengetriggert (eine Aktion je Druck):
+// werden bei Druck/Tap true gesetzt und vom Player nach dem Lesen wieder false.
 export const controls = {
   left: false,
   right: false,
   jump: false,
+  dash: false,
 }
 
-// Tastatur (Desktop): Pfeile / A D / Leertaste. Gibt eine Aufräum-Funktion zurück.
+// Tastatur (Desktop): Pfeile / A D laufen, Leertaste/W/↑ springen, Shift dashen.
 export function attachKeyboard(): () => void {
   const down = (e: KeyboardEvent) => {
     switch (e.code) {
@@ -24,6 +24,11 @@ export function attachKeyboard(): () => void {
       case 'KeyW':
       case 'Space':
         if (!e.repeat) controls.jump = true
+        break
+      case 'ShiftLeft':
+      case 'ShiftRight':
+      case 'KeyK':
+        if (!e.repeat) controls.dash = true
         break
     }
   }

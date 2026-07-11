@@ -9,6 +9,9 @@ export const player: PlayerState = {
   vy: 0,
   onGround: true,
   facing: 1,
+  dashTime: 0,
+  dashCd: 0,
+  checkpointX: 0,
 }
 
 export function resetPlayer(x = 0): void {
@@ -18,6 +21,19 @@ export function resetPlayer(x = 0): void {
   player.vy = 0
   player.onGround = true
   player.facing = 1
+  player.dashTime = 0
+  player.dashCd = 0
+  player.checkpointX = x
+}
+
+// Zurück zum letzten Checkpoint (nach einem Sturz), ohne Blickrichtung/Score zu ändern.
+export function respawnAtCheckpoint(): void {
+  player.x = player.checkpointX
+  player.y = 0
+  player.vx = 0
+  player.vy = 0
+  player.onGround = true
+  player.dashTime = 0
 }
 
 // Dev-Hilfe: Spielerzustand im Browser inspizierbar (für automatisierte Tests).

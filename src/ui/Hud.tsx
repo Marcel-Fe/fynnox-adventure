@@ -1,27 +1,24 @@
 import { useGameStore } from '../store/gameStore'
+import { getLevel } from '../game/levels'
+import { asset } from '../utils/asset'
+import { C, pill } from './theme'
 
-// Kopfzeile: Titel links, Pfotenmünzen-Zähler rechts.
+// In-Game-Kopfzeile im Look des Mockups: links Münz-Zähler, rechts Level-Name.
 export function Hud() {
   const coins = useGameStore((s) => s.coins)
+  const levelId = useGameStore((s) => s.levelId)
+  const level = getLevel(levelId)
+  const total = level.coins.length
+
   return (
     <>
-      <div
-        style={{
-          position: 'fixed', left: 14, top: 12, padding: '6px 12px', borderRadius: 12,
-          background: 'rgba(20,40,30,0.45)', color: '#fff', fontWeight: 700, fontSize: 15,
-          backdropFilter: 'blur(4px)',
-        }}
-      >
-        🦊 Fynnox Adventure — Wald
+      <div style={{ position: 'fixed', left: 16, top: 14, padding: '8px 16px 8px 10px', fontSize: 20, ...pill }}>
+        <img src={asset('art/items/paw_coin.png')} width={30} height={30} alt="" style={{ display: 'block' }} />
+        <span style={{ color: C.yellow }}>{coins}</span>
+        <span style={{ opacity: 0.5, fontSize: 15 }}>/ {total}</span>
       </div>
-      <div
-        style={{
-          position: 'fixed', right: 14, top: 12, padding: '6px 14px', borderRadius: 12,
-          background: 'rgba(40,30,10,0.5)', color: '#ffd76a', fontWeight: 800, fontSize: 18,
-          backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', gap: 6,
-        }}
-      >
-        🐾 {coins}
+      <div style={{ position: 'fixed', right: 16, top: 14, padding: '9px 18px', fontSize: 18, ...pill }}>
+        {level.name}
       </div>
     </>
   )
