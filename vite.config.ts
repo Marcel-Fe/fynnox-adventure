@@ -30,6 +30,9 @@ export default defineConfig({
         ],
       },
       workbox: {
+        cacheId: 'fynnox-adventure', // eindeutige Cache-Namen (getrennt von anderen Apps der Domain)
+        cleanupOutdatedCaches: true,
+        clientsClaim: true,
         globPatterns: ['**/*.{js,css,html,png,svg,woff2}'],
         maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
       },

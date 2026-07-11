@@ -12,6 +12,40 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <title>Fynnox Adventure</title>
+    <script>
+      // Selbstheilung: Auf der geteilten Domain marcel-fe.github.io kann ein alter,
+      // wurzel-weiter Service Worker (z. B. vom früheren Kart-Spiel an der Wurzel)
+      // DIESE Seite kapern und Fremd-Inhalt aus seinem Cache zeigen. Wir entfernen
+      // gezielt nur solche SW, deren Scope diese Seite kontrolliert, aber NICHT zu
+      // dieser App gehört (also den Wurzel-SW). Unser eigener SW und ein separater
+      // /kart-pets/-SW bleiben unberührt. Danach einmalig neu laden.
+      (function () {
+        if (!('serviceWorker' in navigator)) return
+        var ours = '/fynnox-adventure/'
+        var here = location.pathname
+        navigator.serviceWorker
+          .getRegistrations()
+          .then(function (regs) {
+            var killed = false
+            regs.forEach(function (r) {
+              try {
+                var scope = new URL(r.scope).pathname
+                var controlsUs = here.indexOf(scope) === 0
+                var isOurs = scope.indexOf(ours) === 0
+                if (controlsUs && !isOurs) {
+                  r.unregister()
+                  killed = true
+                }
+              } catch (e) {}
+            })
+            if (killed && !sessionStorage.getItem('fa-healed')) {
+              sessionStorage.setItem('fa-healed', '1')
+              location.reload()
+            }
+          })
+          .catch(function () {})
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>
