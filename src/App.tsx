@@ -32,6 +32,7 @@ function GameView() {
     <>
       <Canvas
         key={runId}
+        shadows="soft"
         dpr={[1, 2]}
         camera={{ position: [level.startX, 4.6, 17], fov: 48, near: 0.1, far: 600 }}
         gl={{ antialias: true }}

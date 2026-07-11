@@ -227,6 +227,32 @@ export function makeBankTexture(): THREE.CanvasTexture {
   return t
 }
 
+// Kachelbare Gras-Bodentextur (Aufsicht) für die horizontale 3D-Boden-Ebene.
+export function makeGrassTexture(): THREE.CanvasTexture {
+  const [c, ctx] = makeCanvas(256, 256)
+  const g = ctx.createLinearGradient(0, 0, 256, 256)
+  g.addColorStop(0, '#4fa85e')
+  g.addColorStop(1, '#3d8f4c')
+  ctx.fillStyle = g
+  ctx.fillRect(0, 0, 256, 256)
+  const r = rng(17)
+  // Gras-Büschel als kurze Striche
+  for (let i = 0; i < 260; i++) {
+    const x = r() * 256
+    const y = r() * 256
+    ctx.strokeStyle = r() > 0.5 ? 'rgba(90,200,110,0.5)' : 'rgba(40,120,60,0.5)'
+    ctx.lineWidth = 1.5
+    ctx.beginPath()
+    ctx.moveTo(x, y)
+    ctx.lineTo(x + (r() - 0.5) * 4, y - 4 - r() * 4)
+    ctx.stroke()
+  }
+  const t = toTexture(c, true)
+  t.wrapS = THREE.RepeatWrapping
+  t.wrapT = THREE.RepeatWrapping
+  return t
+}
+
 // Gemaltes Gras-Plattform-Tile (Erde + Grasnarbe oben), nahtlos horizontal kachelbar.
 export function makePlatformTexture(): THREE.CanvasTexture {
   const [c, ctx] = makeCanvas(256, 192)

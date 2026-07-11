@@ -1,54 +1,63 @@
 import { useMemo, Suspense } from 'react'
-import * as THREE from 'three'
-import { Parallax } from '../render/Parallax'
-import { makeGroundStripTexture, makeBankTexture } from '../render/paint'
+import { Sky, Environment } from '@react-three/drei'
+import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing'
+import { Trees3D } from '../render/Trees3D'
+import { makeGrassTexture } from '../render/paint'
 import { Player } from './Player'
 import { Platforms } from './Platforms'
 import { Coins } from './Coins'
 import { Checkpoints, Goal } from './Flags'
 import type { LevelDef } from './level'
 
-// Bühne für einen Level im gemalten 2,5D-Look: Parallax-Kulisse + Bodenstreifen als
-// Optik-Schicht, davor Plattformen, Münzen, Checkpoints, Ziel und Fynnox. Kein 3D-Wald,
-// keine schweren Lichter/Postprocessing mehr — alle Sprites sind „vorbeleuchtet".
-
-const GROUND_H = 7 // Höhe des Boden-Quads (Erde reicht weit nach unten)
-const GROUND_TILE = 3 // Weltbreite je Boden-Textur-Kachel
-
-const BANK_H = 3.8 // Höhe der Busch-Bank; Unterkante überlappt die Graslinie
+// Hochwertige 2,5D-3D-Bühne (Diorama/„New Super Mario Bros"-Anmutung): weiche Beleuchtung
+// + Environment für runde Formen, plastische Plattformen, 3D-Tiefen-Wald mit Nebel,
+// Schatten für Erdung, sanftes Bloom. Spiel-Logik unverändert.
 
 function Ground({ minX, maxX }: { minX: number; maxX: number }) {
-  const tex = useMemo(() => makeGroundStripTexture(), [])
-  const bank = useMemo(() => makeBankTexture(), [])
-  const w = maxX - minX + 200
-  const cx = (minX + maxX) / 2
-  tex.wrapS = THREE.RepeatWrapping
-  tex.repeat.x = w / GROUND_TILE
-  bank.wrapS = THREE.RepeatWrapping
-  bank.repeat.x = w / 8
+  const tex = useMemo(() => {
+    const t = makeGrassTexture()
+    t.repeat.set(60, 60)
+    return t
+  }, [])
+  const w = maxX - minX + 240
   return (
-    <>
-      {/* Weltfeste Busch-Bank (verdeckt den Kulisse↔Boden-Spalt), hinter dem Spielfeld */}
-      <mesh position={[cx, BANK_H / 2 - 0.8, -1]}>
-        <planeGeometry args={[w, BANK_H]} />
-        <meshBasicMaterial map={bank} transparent alphaTest={0.25} toneMapped={false} fog={false} />
-      </mesh>
-      {/* Bodenstreifen */}
-      <mesh position={[cx, -GROUND_H / 2, -0.5]}>
-        <planeGeometry args={[w, GROUND_H]} />
-        <meshBasicMaterial map={tex} toneMapped={false} fog={false} />
-      </mesh>
-    </>
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[(minX + maxX) / 2, 0, 0]} receiveShadow>
+      <planeGeometry args={[w, 400]} />
+      <meshStandardMaterial map={tex} color="#5aa564" roughness={1} />
+    </mesh>
   )
 }
 
 export function AdventureScene({ level }: { level: LevelDef }) {
   return (
     <>
-      <Parallax />
-      <Ground minX={level.startX} maxX={level.goalX} />
+      <Sky sunPosition={[80, 45, 60]} turbidity={3} rayleigh={0.9} mieCoefficient={0.004} mieDirectionalG={0.85} />
+      <fog attach="fog" args={['#bfe0e8', 42, 120]} />
 
-      {/* Spielfeld */}
+      <Suspense fallback={null}>
+        <Environment preset="park" background={false} environmentIntensity={0.9} />
+      </Suspense>
+      <ambientLight intensity={0.45} />
+      <hemisphereLight args={['#cdeaff', '#6a8a55', 0.7]} />
+      <directionalLight
+        color="#fff2d6"
+        position={[35, 60, 30]}
+        intensity={2.1}
+        castShadow
+        shadow-mapSize-width={2048}
+        shadow-mapSize-height={2048}
+        shadow-camera-left={-60}
+        shadow-camera-right={60}
+        shadow-camera-top={60}
+        shadow-camera-bottom={-30}
+        shadow-camera-near={1}
+        shadow-camera-far={200}
+        shadow-bias={-0.0004}
+      />
+
+      <Ground minX={level.startX} maxX={level.goalX} />
+      <Trees3D minX={level.startX} maxX={level.goalX} />
+
       <Platforms platforms={level.platforms} />
       <Suspense fallback={null}>
         <Coins coins={level.coins} />
@@ -56,6 +65,11 @@ export function AdventureScene({ level }: { level: LevelDef }) {
         <Goal x={level.goalX} />
         <Player level={level} />
       </Suspense>
+
+      <EffectComposer enableNormalPass={false}>
+        <Bloom intensity={0.5} luminanceThreshold={0.82} luminanceSmoothing={0.3} mipmapBlur />
+        <Vignette eskil={false} offset={0.25} darkness={0.45} />
+      </EffectComposer>
     </>
   )
 }
