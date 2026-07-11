@@ -8,6 +8,7 @@ import { Player } from './Player'
 import { Platforms } from './Platforms'
 import { Coins } from './Coins'
 import { Checkpoints, Goal } from './Flags'
+import { Foliage } from './Foliage'
 import type { LevelDef } from './level'
 
 // Bühne für einen Level: Kulisse (Boden/Bäume/Himmel) hinter dem Spielfeld +
@@ -16,19 +17,26 @@ import type { LevelDef } from './level'
 function useBackgroundScatter(minX: number, maxX: number): Deco[] {
   return useMemo(() => {
     const out: Deco[] = []
+    // Dichte, gestaffelte Wald-Kulisse hinter dem Spielfeld (z<0) → satter Wald + Parallaxe.
     const bands = [
-      { z: -30, step: 4.5, s: [1.3, 2.2] },
-      { z: -18, step: 3.6, s: [1.0, 1.7] },
-      { z: -9, step: 4.4, s: [0.8, 1.3] },
+      { z: -42, step: 3.4, s: [1.6, 2.6], treeBias: true },
+      { z: -30, step: 2.8, s: [1.3, 2.2], treeBias: true },
+      { z: -20, step: 2.6, s: [1.1, 1.9], treeBias: true },
+      { z: -12, step: 2.8, s: [0.9, 1.5], treeBias: false },
+      { z: -6, step: 3.6, s: [0.7, 1.2], treeBias: false },
     ]
     for (const b of bands) {
-      for (let x = minX - 14; x <= maxX + 14; x += b.step) {
+      for (let x = minX - 16; x <= maxX + 16; x += b.step) {
+        // Fernere Bänder überwiegend Bäume (variant 0/1), nahe auch Büsche/Pilze (2)
+        const variant = b.treeBias
+          ? Math.floor(Math.random() * 2)
+          : Math.floor(Math.random() * 3)
         out.push({
-          x: x + (Math.random() - 0.5) * b.step * 0.7,
+          x: x + (Math.random() - 0.5) * b.step * 0.8,
           z: b.z + (Math.random() - 0.5) * 4,
           s: b.s[0] + Math.random() * (b.s[1] - b.s[0]),
           rot: Math.random() * Math.PI * 2,
-          variant: Math.floor(Math.random() * 3),
+          variant,
         })
       }
     }
@@ -49,11 +57,12 @@ export function AdventureScene({ level }: { level: LevelDef }) {
       <Suspense fallback={null}>
         <Environment preset={theme.envPreset} background={false} environmentIntensity={0.95} />
       </Suspense>
-      <ambientLight intensity={theme.ambient} />
-      <hemisphereLight args={[theme.hemiSky, theme.hemiGround, 0.55]} />
+      <ambientLight intensity={theme.ambient + 0.1} />
+      <hemisphereLight args={[theme.hemiSky, theme.hemiGround, 0.6]} />
       <directionalLight
-        position={[40, 80, 40]}
-        intensity={1.55}
+        color="#fff3da"
+        position={[40, 80, 45]}
+        intensity={1.75}
         castShadow
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
@@ -81,6 +90,7 @@ export function AdventureScene({ level }: { level: LevelDef }) {
       ))}
 
       <Scatter items={scatter} decor={theme.decor} />
+      {theme.decor === 'forest' && <Foliage minX={level.startX - 6} maxX={level.goalX + 6} />}
 
       {/* Spielfeld */}
       <Platforms platforms={level.platforms} />
