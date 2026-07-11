@@ -1,96 +1,52 @@
 import { useMemo, Suspense } from 'react'
-import { Sky, Environment } from '@react-three/drei'
-import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing'
-import { Scatter, type Deco } from '../world/Scatter'
-import { makeGroundTexture } from '../world/textures'
-import { THEMES } from '../world/themes'
+import * as THREE from 'three'
+import { Parallax } from '../render/Parallax'
+import { makeGroundStripTexture, makeBankTexture } from '../render/paint'
 import { Player } from './Player'
 import { Platforms } from './Platforms'
 import { Coins } from './Coins'
 import { Checkpoints, Goal } from './Flags'
-import { Foliage } from './Foliage'
 import type { LevelDef } from './level'
 
-// Bühne für einen Level: Kulisse (Boden/Bäume/Himmel) hinter dem Spielfeld +
-// Plattformen, Münzen, Checkpoints, Ziel und Fynnox. Deko in Tiefen-Bändern (z<0)
-// → Parallaxe.
-function useBackgroundScatter(minX: number, maxX: number): Deco[] {
-  return useMemo(() => {
-    const out: Deco[] = []
-    // Dichte, gestaffelte Wald-Kulisse hinter dem Spielfeld (z<0) → satter Wald + Parallaxe.
-    const bands = [
-      { z: -42, step: 3.4, s: [1.6, 2.6], treeBias: true },
-      { z: -30, step: 2.8, s: [1.3, 2.2], treeBias: true },
-      { z: -20, step: 2.6, s: [1.1, 1.9], treeBias: true },
-      { z: -12, step: 2.8, s: [0.9, 1.5], treeBias: false },
-      { z: -6, step: 3.6, s: [0.7, 1.2], treeBias: false },
-    ]
-    for (const b of bands) {
-      for (let x = minX - 16; x <= maxX + 16; x += b.step) {
-        // Fernere Bänder überwiegend Bäume (variant 0/1), nahe auch Büsche/Pilze (2)
-        const variant = b.treeBias
-          ? Math.floor(Math.random() * 2)
-          : Math.floor(Math.random() * 3)
-        out.push({
-          x: x + (Math.random() - 0.5) * b.step * 0.8,
-          z: b.z + (Math.random() - 0.5) * 4,
-          s: b.s[0] + Math.random() * (b.s[1] - b.s[0]),
-          rot: Math.random() * Math.PI * 2,
-          variant,
-        })
-      }
-    }
-    return out
-  }, [minX, maxX])
+// Bühne für einen Level im gemalten 2,5D-Look: Parallax-Kulisse + Bodenstreifen als
+// Optik-Schicht, davor Plattformen, Münzen, Checkpoints, Ziel und Fynnox. Kein 3D-Wald,
+// keine schweren Lichter/Postprocessing mehr — alle Sprites sind „vorbeleuchtet".
+
+const GROUND_H = 7 // Höhe des Boden-Quads (Erde reicht weit nach unten)
+const GROUND_TILE = 3 // Weltbreite je Boden-Textur-Kachel
+
+const BANK_H = 3.8 // Höhe der Busch-Bank; Unterkante überlappt die Graslinie
+
+function Ground({ minX, maxX }: { minX: number; maxX: number }) {
+  const tex = useMemo(() => makeGroundStripTexture(), [])
+  const bank = useMemo(() => makeBankTexture(), [])
+  const w = maxX - minX + 200
+  const cx = (minX + maxX) / 2
+  tex.wrapS = THREE.RepeatWrapping
+  tex.repeat.x = w / GROUND_TILE
+  bank.wrapS = THREE.RepeatWrapping
+  bank.repeat.x = w / 8
+  return (
+    <>
+      {/* Weltfeste Busch-Bank (verdeckt den Kulisse↔Boden-Spalt), hinter dem Spielfeld */}
+      <mesh position={[cx, BANK_H / 2 - 0.8, -1]}>
+        <planeGeometry args={[w, BANK_H]} />
+        <meshBasicMaterial map={bank} transparent alphaTest={0.25} toneMapped={false} fog={false} />
+      </mesh>
+      {/* Bodenstreifen */}
+      <mesh position={[cx, -GROUND_H / 2, -0.5]}>
+        <planeGeometry args={[w, GROUND_H]} />
+        <meshBasicMaterial map={tex} toneMapped={false} fog={false} />
+      </mesh>
+    </>
+  )
 }
 
 export function AdventureScene({ level }: { level: LevelDef }) {
-  const theme = THEMES[level.world]
-  const scatter = useBackgroundScatter(level.startX, level.goalX)
-  const groundTex = useMemo(() => makeGroundTexture(theme.groundTex), [theme.groundTex])
-
   return (
     <>
-      {theme.sky === 'day' && <Sky sunPosition={[120, 60, 80]} turbidity={4} rayleigh={1.1} mieCoefficient={0.005} />}
-      <fog attach="fog" args={[theme.fog, 55, 175]} />
-
-      <Suspense fallback={null}>
-        <Environment preset={theme.envPreset} background={false} environmentIntensity={0.95} />
-      </Suspense>
-      <ambientLight intensity={theme.ambient + 0.1} />
-      <hemisphereLight args={[theme.hemiSky, theme.hemiGround, 0.6]} />
-      <directionalLight
-        color="#fff3da"
-        position={[40, 80, 45]}
-        intensity={1.75}
-        castShadow
-        shadow-mapSize-width={2048}
-        shadow-mapSize-height={2048}
-        shadow-camera-left={-80}
-        shadow-camera-right={80}
-        shadow-camera-top={80}
-        shadow-camera-bottom={-80}
-        shadow-camera-far={260}
-      />
-
-      {/* Boden */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-        <planeGeometry args={[800, 800]} />
-        <meshStandardMaterial map={groundTex} color={theme.ground} roughness={1} />
-      </mesh>
-
-      {/* Ferne Hügel */}
-      {[
-        [-40, -90], [60, -110], [140, -95], [220, -120], [-120, -100],
-      ].map((h, i) => (
-        <mesh key={i} position={[h[0], -6, h[1]]} scale={[40, 22, 40]} receiveShadow>
-          <sphereGeometry args={[1, 40, 28]} />
-          <meshStandardMaterial color={theme.hemiGround} roughness={1} />
-        </mesh>
-      ))}
-
-      <Scatter items={scatter} decor={theme.decor} />
-      {theme.decor === 'forest' && <Foliage minX={level.startX - 6} maxX={level.goalX + 6} />}
+      <Parallax />
+      <Ground minX={level.startX} maxX={level.goalX} />
 
       {/* Spielfeld */}
       <Platforms platforms={level.platforms} />
@@ -100,11 +56,6 @@ export function AdventureScene({ level }: { level: LevelDef }) {
         <Goal x={level.goalX} />
         <Player level={level} />
       </Suspense>
-
-      <EffectComposer enableNormalPass={false}>
-        <Bloom intensity={0.45} luminanceThreshold={0.8} luminanceSmoothing={0.3} mipmapBlur />
-        <Vignette eskil={false} offset={0.22} darkness={0.5} />
-      </EffectComposer>
     </>
   )
 }
