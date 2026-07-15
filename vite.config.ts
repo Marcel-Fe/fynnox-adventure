@@ -33,7 +33,7 @@ export default defineConfig({
         cacheId: 'fynnox-adventure', // eindeutige Cache-Namen (getrennt von anderen Apps der Domain)
         cleanupOutdatedCaches: true,
         clientsClaim: true,
-        globPatterns: ['**/*.{js,css,html,png,svg,woff2}'],
+        globPatterns: ['**/*.{js,css,html,png,svg,woff2,glb,mp3}'],
         maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
       },
     }),

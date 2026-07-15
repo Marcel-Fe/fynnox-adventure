@@ -8,6 +8,17 @@ export interface Coin {
   y: number
 }
 
+// Optionale Quest-Definition: ein NPC gibt eine Aufgabe (alle Münzen sammeln) und
+// reagiert bei Abgabe. Rein additiv — fehlt sie, läuft das Level wie bisher.
+export interface QuestDef {
+  npcX: number // Position des Auftraggeber-NPCs
+  npcModel?: string // eigenes GLB (z. B. 'lumo.glb'); ohne Angabe → getöntes Fynnox-Modell
+  npcTint?: string // Einfärbung des Platzhalter-Modells
+  ask: string // Aufgabentext, solange noch nicht alle Münzen gesammelt sind
+  ready: string // Text, wenn alles gesammelt ist → „komm zurück"
+  thanks: string // Reaktion nach Abgabe beim NPC
+}
+
 export interface LevelDef {
   id: string
   name: string
@@ -17,6 +28,7 @@ export interface LevelDef {
   platforms: Platform[]
   coins: Coin[]
   checkpoints: number[] // x-Positionen der Checkpoint-Flaggen
+  quest?: QuestDef
 }
 
 // Wald 1-1: freundliche Treppe aus Einweg-Plattformen mit Münzen, zwei Checkpoints
@@ -45,6 +57,13 @@ export const FOREST_LEVEL: LevelDef = {
     { x: 59, y: 1.1 },
   ],
   checkpoints: [20, 42],
+  quest: {
+    npcX: 2,
+    npcTint: '#9fb6d6',
+    ask: 'Hallo Fynnox! Sammle bitte alle Pfotenmünzen 🐾 im Wald.',
+    ready: 'Toll — du hast alle! Komm zurück zu mir. 🐾',
+    thanks: 'Danke, Fynnox! Du bist ein echter Held! 🎉',
+  },
 }
 
 // Sternebewertung: 3 = alle Münzen, 2 = >= 60 %, 1 = Ziel erreicht.

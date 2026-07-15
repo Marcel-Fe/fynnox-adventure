@@ -3,6 +3,7 @@ import { Sky, Environment } from '@react-three/drei'
 import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing'
 import { Trees3D } from '../render/Trees3D'
 import { Scenery } from '../render/Scenery'
+import { Houses } from '../render/Houses'
 import { Water } from '../render/Water'
 import { makeGrassTexture } from '../render/paint'
 import { Player } from './Player'
@@ -60,6 +61,7 @@ export function AdventureScene({ level }: { level: LevelDef }) {
 
       <Ground minX={level.startX} maxX={level.goalX} />
       <Water minX={level.startX} maxX={level.goalX} />
+      <Houses minX={level.startX} maxX={level.goalX} />
       <Trees3D minX={level.startX} maxX={level.goalX} />
       <Scenery minX={level.startX} maxX={level.goalX} />
 
@@ -68,7 +70,12 @@ export function AdventureScene({ level }: { level: LevelDef }) {
         <Coins coins={level.coins} />
         <Checkpoints positions={level.checkpoints} />
         <Goal x={level.goalX} />
-        <Npc def={{ x: 2, text: 'Hallo Fynnox! Sammle alle Pfotenmünzen 🐾 und bring sie zur Ziel-Flagge!' }} />
+        {level.quest && (
+          <Npc
+            def={{ x: level.quest.npcX, model: level.quest.npcModel, tint: level.quest.npcTint }}
+            quest={{ total: level.coins.length, ask: level.quest.ask, ready: level.quest.ready, thanks: level.quest.thanks }}
+          />
+        )}
         <Player level={level} />
       </Suspense>
 

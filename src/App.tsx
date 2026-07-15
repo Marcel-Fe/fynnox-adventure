@@ -6,10 +6,12 @@ import { TouchControls } from './ui/TouchControls'
 import { MainMenu } from './ui/MainMenu'
 import { ResultScreen } from './ui/ResultScreen'
 import { RotateHint } from './ui/RotateHint'
+import { MuteButton } from './ui/MuteButton'
 import { attachKeyboard } from './game/controls'
 import { player } from './game/playerState'
 import { useGameStore } from './store/gameStore'
 import { getLevel } from './game/levels'
+import { initMusic } from './audio/music'
 
 // Strikte Seitenkamera: fest in Z/Y, folgt Fynnox nur in X (2,5D).
 function CameraFollow() {
@@ -34,7 +36,7 @@ function GameView() {
         key={runId}
         shadows="soft"
         dpr={[1, 2]}
-        camera={{ position: [level.startX, 4.6, 17], fov: 48, near: 0.1, far: 600 }}
+        camera={{ position: [level.startX, 4.4, 13.5], fov: 48, near: 0.1, far: 600 }}
         gl={{ antialias: true }}
       >
         <CameraFollow />
@@ -51,10 +53,12 @@ function GameView() {
 export default function App() {
   const screen = useGameStore((s) => s.screen)
   useEffect(() => attachKeyboard(), [])
+  useEffect(() => initMusic(), [])
 
   return (
     <>
       {screen === 'menu' ? <MainMenu /> : <GameView />}
+      <MuteButton />
       <RotateHint />
     </>
   )

@@ -5,37 +5,62 @@ import * as THREE from 'three'
 import { clone as skeletonClone } from 'three/examples/jsm/utils/SkeletonUtils.js'
 import { asset } from '../utils/asset'
 import { player } from './playerState'
+import { useGameStore } from '../store/gameStore'
 
-// Erste NPC-Figur + Sprechblase (Grundstein für „andere Figuren mit Gesten & Aufgaben").
-// Nutzt vorerst das Fynnox-Modell als hochwertigen Platzhalter (eigene Figuren kommen als
-// eigene Modelle/Sheets). Winkt/nickt freundlich; kommt Fynnox näher, erscheint die Aufgabe.
+// NPC-Figur mit echter Aufgaben-Logik. Gibt die Level-Quest (alle Münzen sammeln),
+// zeigt den Fortschritt in der Sprechblase und reagiert bei Abgabe („Danke!").
+//
+// Modell-Pipeline (Lücke 5): jede Figur kann ein eigenes GLB laden
+// (`public/models/<name>.glb`). Ohne `model` dient das getönte Fynnox-Modell als
+// hochwertiger Platzhalter. Wie man ein echtes Figuren-GLB erzeugt, steht in
+// `docs/npc-pipeline.md`.
 
-const URL = asset('models/fynnox.glb')
+const FALLBACK = asset('models/fynnox.glb')
 const TARGET_H = 2.6
+const REACH = 8 // Sprechblase erscheint ab dieser Nähe
 
 export interface NpcDef {
   x: number
-  text: string
+  model?: string // GLB-Dateiname unter public/models/ (ohne Pfad)
+  tint?: string // Einfärbung des Platzhalter-Modells
 }
 
-export function Npc({ def }: { def: NpcDef }) {
-  const { scene } = useGLTF(URL)
+export interface NpcQuest {
+  total: number // Anzahl Münzen im Level
+  ask: string
+  ready: string
+  thanks: string
+}
+
+export function Npc({ def, quest }: { def: NpcDef; quest: NpcQuest }) {
+  const url = def.model ? asset('models/' + def.model) : FALLBACK
+  const { scene } = useGLTF(url)
+  const isFallback = url === FALLBACK
+
+  const coins = useGameStore((s) => s.coins)
+  const questDone = useGameStore((s) => s.questDone)
+  const completeQuest = useGameStore((s) => s.completeQuest)
+  const allCollected = coins >= quest.total
+
   const model = useMemo(() => {
     const m = skeletonClone(scene)
-    // eigene, leicht kühlere Färbung → als andere Figur erkennbar (Material nicht teilen!)
     m.traverse((o) => {
       const mesh = o as THREE.Mesh
       if (mesh.isMesh && mesh.material) {
         const mat = (mesh.material as THREE.MeshStandardMaterial).clone()
-        mat.color.multiplyScalar(0.9)
-        mat.color.lerp(new THREE.Color('#9fb6d6'), 0.25)
+        // Platzhalter (Fynnox-Modell) leicht kühler tönen → als andere Figur erkennbar.
+        // Eigene GLBs bleiben unverfälscht, außer es wird bewusst getönt.
+        if (isFallback || def.tint) {
+          mat.color.multiplyScalar(0.85)
+          mat.color.lerp(new THREE.Color(def.tint ?? '#8fb0e0'), 0.5)
+        }
         mesh.material = mat
         mesh.castShadow = true
         mesh.frustumCulled = false
       }
     })
     return m
-  }, [scene])
+  }, [scene, isFallback, def.tint])
 
   const { scaleV, yOff } = useMemo(() => {
     const box = new THREE.Box3().setFromObject(model)
@@ -63,13 +88,26 @@ export function Npc({ def }: { def: NpcDef }) {
   useFrame((_, delta) => {
     t.current += delta
     const dist = Math.abs(player.x - def.x)
-    const isNear = dist < 8
+    const isNear = dist < REACH
     if (isNear !== near) setNear(isNear)
 
-    if (outer.current) outer.current.position.y = yOff + Math.sin(t.current * 2) * 0.03
-    if (head) head.rotation.x = base.headX + Math.sin(t.current * 2.2) * 0.12 // freundliches Nicken
-    if (rArm) rArm.rotation.z = base.armZ + (isNear ? 0.6 + Math.abs(Math.sin(t.current * 6)) * 0.4 : 0.1) // Winken
+    // Abgabe: alles gesammelt + beim NPC → Quest erfüllt (einmalig).
+    // Zustand FRISCH aus dem Store lesen (nicht aus der Render-Closure) → immer aktuell.
+    const st = useGameStore.getState()
+    if (isNear && st.coins >= quest.total && !st.questDone) completeQuest()
+
+    // Freut sich stärker, wenn die Aufgabe erledigt ist.
+    const joy = questDone ? 1 : allCollected ? 0.6 : 0
+    if (outer.current) outer.current.position.y = yOff + Math.sin(t.current * 2) * (0.03 + joy * 0.05)
+    if (head) head.rotation.x = base.headX + Math.sin(t.current * 2.2) * 0.12
+    if (rArm) {
+      const waveAmp = isNear ? 0.6 + Math.abs(Math.sin(t.current * (6 + joy * 4))) * (0.4 + joy * 0.5) : 0.1
+      rArm.rotation.z = base.armZ + waveAmp
+    }
   })
+
+  const bubbleText = questDone ? quest.thanks : allCollected ? quest.ready : `${quest.ask} (${coins}/${quest.total})`
+  const bubbleColor = questDone ? '#2f9e54' : '#2f6fe0'
 
   return (
     <group position={[def.x, 0, 0]}>
@@ -91,12 +129,12 @@ export function Npc({ def }: { def: NpcDef }) {
               width: 220,
               textAlign: 'center',
               boxShadow: '0 6px 18px rgba(0,0,0,0.28)',
-              border: '3px solid #2f6fe0',
+              border: `3px solid ${bubbleColor}`,
               position: 'relative',
               userSelect: 'none',
             }}
           >
-            {def.text}
+            {bubbleText}
             <div
               style={{
                 position: 'absolute',
@@ -107,7 +145,7 @@ export function Npc({ def }: { def: NpcDef }) {
                 height: 0,
                 borderLeft: '10px solid transparent',
                 borderRight: '10px solid transparent',
-                borderTop: '12px solid #2f6fe0',
+                borderTop: `12px solid ${bubbleColor}`,
               }}
             />
           </div>
