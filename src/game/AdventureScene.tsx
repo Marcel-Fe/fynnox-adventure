@@ -9,6 +9,7 @@ import { Player } from './Player'
 import { Platforms } from './Platforms'
 import { Coins } from './Coins'
 import { Checkpoints, Goal } from './Flags'
+import { Npc } from './Npc'
 import type { LevelDef } from './level'
 
 // Hochwertige 2,5D-3D-Bühne (Diorama/„New Super Mario Bros"-Anmutung): weiche Beleuchtung
@@ -67,6 +68,7 @@ export function AdventureScene({ level }: { level: LevelDef }) {
         <Coins coins={level.coins} />
         <Checkpoints positions={level.checkpoints} />
         <Goal x={level.goalX} />
+        <Npc def={{ x: 2, text: 'Hallo Fynnox! Sammle alle Pfotenmünzen 🐾 und bring sie zur Ziel-Flagge!' }} />
         <Player level={level} />
       </Suspense>
 
