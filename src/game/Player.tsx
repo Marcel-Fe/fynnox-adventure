@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
-import { Fynnox } from './Fynnox'
+import { FynnoxModel } from './Fynnox3D'
 import { player, resetPlayer, respawnAtCheckpoint } from './playerState'
 import { controls } from './controls'
 import { stepPlayer } from './physics'
@@ -46,7 +46,7 @@ export function Player({ level }: { level: LevelDef }) {
 
   return (
     <group ref={g}>
-      <Fynnox />
+      <FynnoxModel />
     </group>
   )
 }
