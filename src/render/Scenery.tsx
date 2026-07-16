@@ -73,7 +73,9 @@ function DistantHills({ minX, maxX }: { minX: number; maxX: number }) {
 
 const FLOWER_COLORS = ['#ff5a7a', '#ffd23f', '#ffffff', '#ff8fc4', '#7ac8ff']
 
-export function Scenery({ minX, maxX }: { minX: number; maxX: number }) {
+// `hills`: prozedurale Hügel/Berge. Liegt ein gemalter Hintergrund vor, werden sie
+// abgeschaltet — sonst würden sie das Artwork verdecken und dagegen arbeiten.
+export function Scenery({ minX, maxX, hills = true }: { minX: number; maxX: number; hills?: boolean }) {
   const flowerTex = useMemo(() => makeFlowerTexture(), [])
   const data = useMemo(() => {
     const r = rand(4242)
@@ -127,7 +129,7 @@ export function Scenery({ minX, maxX }: { minX: number; maxX: number }) {
 
   return (
     <>
-      <DistantHills minX={minX} maxX={maxX} />
+      {hills && <DistantHills minX={minX} maxX={maxX} />}
 
       {/* Blumen: farbige 5-Blütenblatt-Blüte (zur Kamera gerichtet) */}
       <Instances limit={data.flowers.length}>

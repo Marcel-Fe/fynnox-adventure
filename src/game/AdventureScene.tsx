@@ -4,6 +4,7 @@ import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing'
 import { Trees3D } from '../render/Trees3D'
 import { Scenery } from '../render/Scenery'
 import { Houses } from '../render/Houses'
+import { Backdrop } from '../render/Parallax3D'
 import { Life } from '../render/Life'
 import { Water } from '../render/Water'
 import { makeGrassTexture } from '../render/paint'
@@ -62,11 +63,19 @@ export function AdventureScene({ level }: { level: LevelDef }) {
         shadow-bias={-0.0004}
       />
 
+      {level.bg && (
+        <Suspense fallback={null}>
+          <Backdrop url={level.bg} />
+        </Suspense>
+      )}
+
       <Ground minX={level.startX} maxX={level.goalX} />
-      <Water minX={level.startX} maxX={level.goalX} />
+      {/* Prozedurales Wasser nur ohne gemalten Hintergrund: das Artwork bringt Fluss,
+          See und Wasserfälle selbst mit — sonst schweben die Wasserfall-Flächen davor. */}
+      {!level.bg && <Water minX={level.startX} maxX={level.goalX} />}
       <Houses minX={level.startX} maxX={level.goalX} />
       <Trees3D minX={level.startX} maxX={level.goalX} />
-      <Scenery minX={level.startX} maxX={level.goalX} />
+      <Scenery minX={level.startX} maxX={level.goalX} hills={!level.bg} />
       <Life minX={level.startX} maxX={level.goalX} />
 
       <Platforms platforms={level.platforms} />
