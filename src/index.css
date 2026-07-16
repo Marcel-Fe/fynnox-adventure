@@ -39,3 +39,80 @@ button {
   0%, 100% { transform: rotate(-12deg); }
   50% { transform: rotate(78deg); }
 }
+
+/* --- Menü-Politur --- */
+@keyframes fafloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-9px); }
+}
+.fa-float { animation: fafloat 3.4s ease-in-out infinite; }
+
+.fa-tile {
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+.fa-tile:hover:not(:disabled) {
+  transform: translateY(-5px);
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.5);
+}
+.fa-tile:disabled { cursor: default; }
+
+.fa-play {
+  transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.1s ease;
+}
+.fa-play:hover { filter: brightness(1.06); }
+.fa-play:active { transform: translateY(4px); box-shadow: 0 2px 0 #c85718 !important; }
+
+/* ============ Splash / Cover-Popup ============ */
+@keyframes fa-fadein { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fa-pop {
+  0% { opacity: 0; transform: scale(0.82); }
+  62% { opacity: 1; transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+@keyframes fa-rise {
+  0% { opacity: 0; transform: translateY(38px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes fa-pulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 8px 0 #b64d13, 0 0 0 0 rgba(255,140,60,0.55); }
+  50% { transform: scale(1.045); box-shadow: 0 8px 0 #b64d13, 0 0 40px 10px rgba(255,140,60,0.45); }
+}
+@keyframes fa-hint { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
+@keyframes fa-splashout { to { opacity: 0; transform: scale(1.09); filter: blur(7px); } }
+@keyframes fa-ringspin { to { transform: rotate(360deg); } }
+
+.fa-splash { animation: fa-fadein 0.45s ease both; }
+.fa-splash-out { animation: fa-splashout 0.6s ease forwards; pointer-events: none; }
+
+.fa-splash-mascot { animation: fa-pop 0.75s cubic-bezier(0.2, 0.9, 0.3, 1.25) both; }
+.fa-splash-logo { animation: fa-pop 0.7s cubic-bezier(0.2, 0.9, 0.3, 1.2) both; animation-delay: 0.12s; }
+.fa-splash-tag { animation: fa-rise 0.7s ease both; animation-delay: 0.28s; }
+.fa-splash-cta { animation: fa-rise 0.6s ease both; animation-delay: 0.42s; }
+.fa-splash-cta-pulse { animation: fa-pulse 1.9s ease-in-out infinite; }
+.fa-splash-hint { animation: fa-hint 1.7s ease-in-out infinite; }
+.fa-ring { animation: fa-ringspin 14s linear infinite; }
+
+/* ============ Modernes Menü ============ */
+@keyframes fa-menuin { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+.fa-menu { animation: fa-menuin 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+
+.fa-glass {
+  background: rgba(14, 24, 44, 0.5);
+  backdrop-filter: blur(12px) saturate(1.2);
+  -webkit-backdrop-filter: blur(12px) saturate(1.2);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.fa-card {
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.fa-card .fa-thumb { transition: transform 0.35s ease; }
+.fa-card:hover:not(:disabled) { transform: translateY(-7px) scale(1.02); }
+.fa-card:hover:not(:disabled) .fa-thumb { transform: scale(1.09); }
+.fa-card:disabled { cursor: default; }
+
+.fa-cta {
+  transition: transform 0.1s ease, box-shadow 0.12s ease, filter 0.12s ease;
+}
+.fa-cta:hover { filter: brightness(1.07); }
+.fa-cta:active { transform: translateY(4px); }

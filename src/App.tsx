@@ -1,9 +1,10 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { AdventureScene } from './game/AdventureScene'
 import { Hud } from './ui/Hud'
 import { TouchControls } from './ui/TouchControls'
 import { MainMenu } from './ui/MainMenu'
+import { SplashScreen } from './ui/SplashScreen'
 import { ResultScreen } from './ui/ResultScreen'
 import { RotateHint } from './ui/RotateHint'
 import { MuteButton } from './ui/MuteButton'
@@ -52,12 +53,23 @@ function GameView() {
 
 export default function App() {
   const screen = useGameStore((s) => s.screen)
+  // Cover-Splash nur beim ersten Laden — nach „Zurück zum Menü" direkt ins Menü.
+  const [entered, setEntered] = useState(false)
   useEffect(() => attachKeyboard(), [])
   useEffect(() => initMusic(), [])
 
+  if (screen === 'menu') {
+    return (
+      <>
+        {entered ? <MainMenu /> : <SplashScreen onStart={() => setEntered(true)} />}
+        <RotateHint />
+      </>
+    )
+  }
+
   return (
     <>
-      {screen === 'menu' ? <MainMenu /> : <GameView />}
+      <GameView />
       <MuteButton />
       <RotateHint />
     </>
