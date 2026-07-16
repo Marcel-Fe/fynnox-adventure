@@ -67,7 +67,8 @@ function LeafCrown({ green, greenLight }: { green: THREE.Color; greenLight: THRE
       {blobs.map(([x, y, z, s], i) => (
         <mesh key={i} position={[x, y, z]} castShadow>
           <sphereGeometry args={[s, 16, 14]} />
-          <meshStandardMaterial color={i % 2 === 0 ? green : greenLight} roughness={0.85} />
+          {/* glänzendes Laub: niedrige Rauheit + kräftige Environment-Reflexe → satter „neuer Look" */}
+          <meshStandardMaterial color={i % 2 === 0 ? green : greenLight} roughness={0.5} envMapIntensity={0.75} />
         </mesh>
       ))}
     </>
@@ -87,7 +88,7 @@ function ConiferCrown({ green }: { green: THREE.Color }) {
       {tiers.map(([y, rad, h], i) => (
         <mesh key={i} position={[0, y, 0]} castShadow>
           <coneGeometry args={[rad, h, 9]} />
-          <meshStandardMaterial color={dark} roughness={0.82} />
+          <meshStandardMaterial color={dark} roughness={0.52} envMapIntensity={0.75} />
         </mesh>
       ))}
     </>
@@ -95,8 +96,9 @@ function ConiferCrown({ green }: { green: THREE.Color }) {
 }
 
 function Tree({ inst, crownRef }: { inst: TreeInst; crownRef: (g: THREE.Group | null) => void }) {
-  const green = new THREE.Color().setHSL(0.32 + inst.hue * 0.06, 0.55, 0.34 + inst.hue * 0.07)
-  const greenLight = green.clone().offsetHSL(0, 0, 0.08)
+  // Satte, tiefe Grüntöne — der Glanz kommt über niedrige Rauheit, NICHT über Aufhellen.
+  const green = new THREE.Color().setHSL(0.31 + inst.hue * 0.05, 0.68, 0.27 + inst.hue * 0.05)
+  const greenLight = green.clone().offsetHSL(0, -0.04, 0.07)
 
   return (
     <group position={inst.pos} scale={inst.scale}>
@@ -104,7 +106,7 @@ function Tree({ inst, crownRef }: { inst: TreeInst; crownRef: (g: THREE.Group | 
       {inst.type !== 'bush' && (
         <mesh position={[0, 0.5, 0]} castShadow receiveShadow>
           <cylinderGeometry args={[0.16, 0.24, inst.type === 'conifer' ? 0.8 : 1.0, 10]} />
-          <meshStandardMaterial color={inst.trunk} roughness={0.9} />
+          <meshStandardMaterial color={inst.trunk} roughness={0.72} envMapIntensity={0.8} />
         </mesh>
       )}
 
@@ -119,7 +121,7 @@ function Tree({ inst, crownRef }: { inst: TreeInst; crownRef: (g: THREE.Group | 
             ].map(([x, y, z, s], i) => (
               <mesh key={i} position={[x, y, z]} castShadow>
                 <sphereGeometry args={[s, 14, 12]} />
-                <meshStandardMaterial color={i % 2 === 0 ? green : greenLight} roughness={0.85} />
+                <meshStandardMaterial color={i % 2 === 0 ? green : greenLight} roughness={0.5} envMapIntensity={0.75} />
               </mesh>
             ))}
           </>
@@ -134,15 +136,20 @@ export function Trees3D({ minX, maxX }: { minX: number; maxX: number }) {
   const crowns = useRef<(THREE.Group | null)[]>([])
   const t = useRef(0)
 
-  // Leichte Wind-Neigung: eine Schleife wiegt alle Kronen sanft (Busch weniger).
+  // Wind: eine Schleife wiegt alle Kronen. Zwei überlagerte Frequenzen (langsame Böe +
+  // schnelles Zittern) → wirkt lebendig statt wie ein Metronom.
   useFrame((_, delta) => {
     t.current += delta
     const time = t.current
     for (let i = 0; i < trees.length; i++) {
       const g = crowns.current[i]
       if (!g) continue
-      const amp = trees[i].type === 'bush' ? 0.02 : 0.05
-      g.rotation.z = Math.sin(time * 1.1 + trees[i].phase) * amp
+      const tr = trees[i]
+      const amp = tr.type === 'bush' ? 0.035 : 0.085
+      const gust = Math.sin(time * 0.9 + tr.phase) * amp
+      const flutter = Math.sin(time * 3.4 + tr.phase * 2) * amp * 0.28
+      g.rotation.z = gust + flutter
+      g.rotation.x = Math.sin(time * 0.7 + tr.phase * 1.5) * amp * 0.35
     }
   })
 

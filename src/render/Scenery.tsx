@@ -1,6 +1,8 @@
-import { useMemo } from 'react'
+import { useMemo, useRef } from 'react'
+import { useFrame } from '@react-three/fiber'
 import { Instances, Instance } from '@react-three/drei'
 import * as THREE from 'three'
+import { player } from '../game/playerState'
 
 // Landschafts-Anreicherung für den modernen Cartoon-Look: entfernte Hügel/Berge (Tiefe
 // + Dunst), plus Boden-Deko (Blumen, Felsen, Büschel, Steine) rund um das Spielfeld.
@@ -94,6 +96,35 @@ export function Scenery({ minX, maxX }: { minX: number; maxX: number }) {
     return { flowers, rocks, tufts, bushes }
   }, [minX, maxX])
 
+  // „Bewegte Welt": Graswelle + Blumen, die auf Fynnox reagieren (Referenz-Sheet, Abschnitt 3).
+  const flowerRefs = useRef<(THREE.Object3D | null)[]>([])
+  const tuftRefs = useRef<(THREE.Object3D | null)[]>([])
+  useFrame(({ clock }) => {
+    const t = clock.elapsedTime
+
+    // Graswelle: versetzte Phase über x → die Welle läuft durchs Gras
+    for (let i = 0; i < data.tufts.length; i++) {
+      const o = tuftRefs.current[i]
+      if (!o) continue
+      const p = data.tufts[i].p
+      o.rotation.z = Math.sin(t * 1.7 + p[0] * 0.55) * 0.13
+    }
+
+    // Blumen: sanfter Wind; kommt Fynnox nah, biegen sie sich von ihm weg und federn zurück
+    for (let i = 0; i < data.flowers.length; i++) {
+      const o = flowerRefs.current[i]
+      if (!o) continue
+      const f = data.flowers[i]
+      const dx = player.x - f.p[0]
+      const wind = Math.sin(t * 2.1 + f.p[0] * 0.7) * 0.1
+      const inLane = Math.abs(f.p[2]) < 4.5 // nur Blumen nahe der Spielachse reagieren
+      const d = Math.abs(dx)
+      const push = inLane && d < 1.8 ? -Math.sign(dx) * 0.85 * (1 - d / 1.8) : 0
+      o.rotation.z = wind + push
+      o.position.y = f.p[1] + (push !== 0 ? 0.05 : 0)
+    }
+  })
+
   return (
     <>
       <DistantHills minX={minX} maxX={maxX} />
@@ -103,16 +134,16 @@ export function Scenery({ minX, maxX }: { minX: number; maxX: number }) {
         <planeGeometry args={[1, 1]} />
         <meshBasicMaterial map={flowerTex} transparent alphaTest={0.4} side={2} toneMapped={false} />
         {data.flowers.map((f, i) => (
-          <Instance key={i} position={f.p} scale={f.s} color={f.c} />
+          <Instance key={i} ref={(el: THREE.Object3D | null) => { flowerRefs.current[i] = el }} position={f.p} scale={f.s} color={f.c} />
         ))}
       </Instances>
 
       {/* Grasbüschel (kleine grüne Kegel) */}
       <Instances limit={data.tufts.length}>
         <coneGeometry args={[0.5, 1, 6]} />
-        <meshStandardMaterial color="#3f9a52" roughness={0.9} />
+        <meshStandardMaterial color="#3f9a52" roughness={0.55} envMapIntensity={0.75} />
         {data.tufts.map((t, i) => (
-          <Instance key={i} position={t.p} scale={[t.s, t.s * 1.6, t.s]} />
+          <Instance key={i} ref={(el: THREE.Object3D | null) => { tuftRefs.current[i] = el }} position={t.p} scale={[t.s, t.s * 1.6, t.s]} />
         ))}
       </Instances>
 
@@ -128,7 +159,7 @@ export function Scenery({ minX, maxX }: { minX: number; maxX: number }) {
       {/* Büsche (kleine runde Laubkugeln) */}
       <Instances limit={data.bushes.length} castShadow>
         <sphereGeometry args={[1, 12, 10]} />
-        <meshStandardMaterial color="#39914c" roughness={0.85} />
+        <meshStandardMaterial color="#3d9c52" roughness={0.5} envMapIntensity={0.75} />
         {data.bushes.map((bs, i) => (
           <Instance key={i} position={bs.p} scale={[bs.s * 1.3, bs.s, bs.s]} />
         ))}

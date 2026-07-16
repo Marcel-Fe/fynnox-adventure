@@ -4,6 +4,7 @@ import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing'
 import { Trees3D } from '../render/Trees3D'
 import { Scenery } from '../render/Scenery'
 import { Houses } from '../render/Houses'
+import { Life } from '../render/Life'
 import { Water } from '../render/Water'
 import { makeGrassTexture } from '../render/paint'
 import { Player } from './Player'
@@ -27,7 +28,7 @@ function Ground({ minX, maxX }: { minX: number; maxX: number }) {
   return (
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[(minX + maxX) / 2, 0, 0]} receiveShadow>
       <planeGeometry args={[w, 400]} />
-      <meshStandardMaterial map={tex} color="#5aa564" roughness={1} />
+      <meshStandardMaterial map={tex} color="#5fb069" roughness={0.62} envMapIntensity={1.15} />
     </mesh>
   )
 }
@@ -38,11 +39,13 @@ export function AdventureScene({ level }: { level: LevelDef }) {
       <Sky sunPosition={[80, 45, 60]} turbidity={3} rayleigh={0.9} mieCoefficient={0.004} mieDirectionalG={0.85} />
       <fog attach="fog" args={['#bfe0e8', 42, 120]} />
 
+      {/* Füllicht bewusst sparsam: zu viel Ambient/Hemisphere wäscht alle Farben aus.
+          Der Glanz und die Tiefe kommen aus dem starken, warmen Hauptlicht + Environment. */}
       <Suspense fallback={null}>
-        <Environment preset="park" background={false} environmentIntensity={0.9} />
+        <Environment preset="park" background={false} environmentIntensity={0.55} />
       </Suspense>
-      <ambientLight intensity={0.45} />
-      <hemisphereLight args={['#cdeaff', '#6a8a55', 0.7]} />
+      <ambientLight intensity={0.22} />
+      <hemisphereLight args={['#cdeaff', '#4d6b3f', 0.42]} />
       <directionalLight
         color="#fff2d6"
         position={[35, 60, 30]}
@@ -64,6 +67,7 @@ export function AdventureScene({ level }: { level: LevelDef }) {
       <Houses minX={level.startX} maxX={level.goalX} />
       <Trees3D minX={level.startX} maxX={level.goalX} />
       <Scenery minX={level.startX} maxX={level.goalX} />
+      <Life minX={level.startX} maxX={level.goalX} />
 
       <Platforms platforms={level.platforms} />
       <Suspense fallback={null}>
