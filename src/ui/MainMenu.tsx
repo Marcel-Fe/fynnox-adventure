@@ -1,7 +1,9 @@
-import { useSyncExternalStore } from 'react'
+import { useState, useSyncExternalStore } from 'react'
 import { useGameStore } from '../store/gameStore'
 import { asset } from '../utils/asset'
 import { C } from './theme'
+import { LevelSelect } from './LevelSelect'
+import { isUnlocked, LEVEL_ORDER, WORLD_GROUPS } from '../game/levels'
 import { isMuted, toggleMute, subscribeMusic } from '../audio/music'
 
 interface WorldTile {
@@ -9,17 +11,17 @@ interface WorldTile {
   name: string
   subtitle: string
   img: string
-  levelId?: string
-  active: boolean
 }
 
 // Anzeige-Namen im Look der Dashboard-Vorlage; die technischen Level-/World-Keys bleiben.
+// Ob eine Welt spielbar ist, ergibt sich jetzt aus dem Fortschritt (WORLD_GROUPS), nicht
+// mehr aus einem festen Flag.
 const WORLDS: WorldTile[] = [
-  { key: 'forest', name: 'Sonnenwald', subtitle: 'Grünes Tal', img: 'art/previews/wald.png', levelId: 'wald-1', active: true },
-  { key: 'candy', name: 'Zuckerwirbel', subtitle: 'Gesperrt', img: 'art/previews/zuckerwirbel.png', active: false },
-  { key: 'volcano', name: 'Vulkanlande', subtitle: 'Gesperrt', img: 'art/previews/vulkan.png', active: false },
-  { key: 'ice', name: 'Eiswindtundra', subtitle: 'Gesperrt', img: 'art/previews/gletscher.png', active: false },
-  { key: 'city', name: 'Sternenstadt', subtitle: 'Gesperrt', img: 'art/previews/neon.png', active: false },
+  { key: 'forest', name: 'Sonnenwald', subtitle: 'Grünes Tal', img: 'art/previews/wald.png' },
+  { key: 'candy', name: 'Zuckerwirbel', subtitle: 'Schaffe zuerst den Wald', img: 'art/previews/zuckerwirbel.png' },
+  { key: 'volcano', name: 'Vulkanlande', subtitle: 'Bald', img: 'art/previews/vulkan.png' },
+  { key: 'ice', name: 'Eiswindtundra', subtitle: 'Bald', img: 'art/previews/gletscher.png' },
+  { key: 'city', name: 'Sternenstadt', subtitle: 'Bald', img: 'art/previews/neon.png' },
 ]
 
 // Rechte Navigations-Leiste. Nur „Spielen" ist echt; die kommenden Bereiche sind klar
@@ -50,9 +52,24 @@ function HeaderMute() {
 export function MainMenu() {
   const start = useGameStore((s) => s.start)
   const save = useGameStore((s) => s.save)
-  const bestWald = save.bestStars['wald-1'] ?? 0
+  const [openWorld, setOpenWorld] = useState<string | null>(null)
   const totalStars = Object.values(save.bestStars).reduce((a, b) => a + b, 0)
-  const forestProgress = Math.round((bestWald / 3) * 100)
+
+  // Fortschritt je Welt: Anteil der erreichten Sterne an allen möglichen.
+  const progressOf = (key: string) => {
+    const g = WORLD_GROUPS.find((w) => w.key === key)
+    if (!g) return 0
+    const got = g.levels.reduce((a, id) => a + (save.bestStars[id] ?? 0), 0)
+    return Math.round((got / (g.levels.length * 3)) * 100)
+  }
+  const worldOpen = (key: string) => {
+    const g = WORLD_GROUPS.find((w) => w.key === key)
+    return !!g && isUnlocked(g.levels[0], save)
+  }
+
+  // „Spielen" führt dorthin, wo es weitergeht: erstes freigeschaltetes, noch nicht
+  // abgeschlossenes Level — sonst zurück ins allererste.
+  const continueId = LEVEL_ORDER.find((id) => isUnlocked(id, save) && !save.done[id]) ?? LEVEL_ORDER[0]
 
   return (
     <div className="fa-menu" style={{ position: 'fixed', inset: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', color: '#fff' }}>
@@ -109,7 +126,7 @@ export function MainMenu() {
         <nav style={{ position: 'absolute', right: 26, top: '8%', width: 300, display: 'flex', flexDirection: 'column', gap: 12 }}>
           <button
             className="fa-cta"
-            onClick={() => start('wald-1')}
+            onClick={() => start(continueId)}
             style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, background: C.orange, color: '#fff', fontSize: 24, fontWeight: 900, border: 'none', borderRadius: 18, padding: '18px 0', cursor: 'pointer', boxShadow: '0 7px 0 #b64d13' }}
           >
             ▶ Spielen
@@ -134,43 +151,45 @@ export function MainMenu() {
             🍃 Wähle deine Welt
           </div>
           <div style={{ display: 'flex', gap: 12, overflowX: 'auto', paddingBottom: 8 }}>
-            {WORLDS.map((w) => (
-              <button
-                key={w.key}
-                className="fa-card"
-                onClick={() => w.active && w.levelId && start(w.levelId)}
-                disabled={!w.active}
-                style={{
-                  position: 'relative', flex: '0 0 auto', width: 165, height: 138, borderRadius: 18, overflow: 'hidden',
-                  padding: 0, background: '#0b1220', color: '#fff', border: `3px solid ${w.active ? C.orange : 'rgba(255,255,255,0.22)'}`,
-                  boxShadow: w.active ? `0 10px 26px rgba(0,0,0,0.45), 0 0 22px rgba(255,122,47,0.4)` : '0 8px 20px rgba(0,0,0,0.4)',
-                }}
-              >
-                <img className="fa-thumb" src={asset(w.img)} alt={w.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: w.active ? 1 : 0.5 }} />
-                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(transparent 28%, rgba(0,0,0,0.55) 58%, rgba(0,0,0,0.92) 100%)' }} />
+            {WORLDS.map((w) => {
+              const open = worldOpen(w.key)
+              const progress = progressOf(w.key)
+              const group = WORLD_GROUPS.find((g) => g.key === w.key)
+              return (
+                <button
+                  key={w.key}
+                  className="fa-card"
+                  onClick={() => open && setOpenWorld(w.key)}
+                  disabled={!open}
+                  style={{
+                    position: 'relative', flex: '0 0 auto', width: 165, height: 138, borderRadius: 18, overflow: 'hidden',
+                    padding: 0, background: '#0b1220', color: '#fff', border: `3px solid ${open ? C.orange : 'rgba(255,255,255,0.22)'}`,
+                    boxShadow: open ? `0 10px 26px rgba(0,0,0,0.45), 0 0 22px rgba(255,122,47,0.4)` : '0 8px 20px rgba(0,0,0,0.4)',
+                  }}
+                >
+                  <img className="fa-thumb" src={asset(w.img)} alt={w.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: open ? 1 : 0.5 }} />
+                  <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(transparent 28%, rgba(0,0,0,0.55) 58%, rgba(0,0,0,0.92) 100%)' }} />
 
-                {w.active && bestWald === 0 && (
-                  <span style={{ position: 'absolute', left: 8, top: 8, background: C.orange, color: '#fff', fontSize: 12, fontWeight: 900, padding: '3px 10px', borderRadius: 999, boxShadow: '0 3px 8px rgba(0,0,0,0.4)' }}>Neu</span>
-                )}
-                {!w.active && (
-                  <span style={{ position: 'absolute', right: 8, top: 8, width: 30, height: 30, borderRadius: '50%', background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15 }}>🔒</span>
-                )}
-
-                <div style={{ position: 'absolute', left: 0, bottom: 0, width: '100%', padding: '16px 12px 12px', textAlign: 'left' }}>
-                  <div style={{ fontWeight: 800, fontSize: 16, lineHeight: 1.2 }}>{w.name}</div>
-                  <div style={{ fontSize: 12.5, fontWeight: 600, opacity: 0.85, lineHeight: 1.3 }}>
-                    {w.active ? (bestWald > 0 ? `Fortschritt: ${forestProgress} %` : 'Neues Abenteuer') : w.subtitle}
-                  </div>
-                  {w.active && bestWald > 0 && (
-                    <div style={{ display: 'flex', gap: 2, marginTop: 5 }}>
-                      {[1, 2, 3].map((n) => (
-                        <img key={n} src={asset('art/items/star.png')} width={15} height={15} alt="" style={{ opacity: n <= bestWald ? 1 : 0.3, filter: n <= bestWald ? 'none' : 'grayscale(1)' }} />
-                      ))}
-                    </div>
+                  {open && progress === 0 && (
+                    <span style={{ position: 'absolute', left: 8, top: 8, background: C.orange, color: '#fff', fontSize: 12, fontWeight: 900, padding: '3px 10px', borderRadius: 999, boxShadow: '0 3px 8px rgba(0,0,0,0.4)' }}>Neu</span>
                   )}
-                </div>
-              </button>
-            ))}
+                  {!open && (
+                    <span style={{ position: 'absolute', right: 8, top: 8, width: 30, height: 30, borderRadius: '50%', background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15 }}>🔒</span>
+                  )}
+
+                  <div style={{ position: 'absolute', left: 0, bottom: 0, width: '100%', padding: '16px 12px 12px', textAlign: 'left' }}>
+                    <div style={{ fontWeight: 800, fontSize: 16, lineHeight: 1.2 }}>{w.name}</div>
+                    <div style={{ fontSize: 12.5, fontWeight: 600, opacity: 0.85, lineHeight: 1.3 }}>
+                      {open
+                        ? progress > 0
+                          ? `Fortschritt: ${progress} %`
+                          : `${group?.levels.length ?? 0} Level · Neues Abenteuer`
+                        : w.subtitle}
+                    </div>
+                  </div>
+                </button>
+              )
+            })}
           </div>
           {/* Karussell-Punkte (dekorativ, passend zur Vorlage) */}
           <div style={{ display: 'flex', gap: 7, justifyContent: 'center', marginTop: 2 }}>
@@ -191,6 +210,8 @@ export function MainMenu() {
           <span style={{ opacity: 0.8 }}>© 2026 Fynnox Studios</span>
         </div>
       </footer>
+
+      {openWorld && <LevelSelect worldKey={openWorld} onClose={() => setOpenWorld(null)} />}
     </div>
   )
 }

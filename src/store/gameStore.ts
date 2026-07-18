@@ -72,8 +72,10 @@ export const useGameStore = create<GameState>((set) => ({
     set((s) => {
       const prevBest = s.save.bestStars[r.levelId] ?? 0
       const save: SaveData = {
+        ...s.save,
         totalCoins: s.save.totalCoins + r.coins,
         bestStars: { ...s.save.bestStars, [r.levelId]: Math.max(prevBest, r.stars) },
+        done: { ...s.save.done, [r.levelId]: true }, // schaltet das nächste Level frei
       }
       writeSave(save)
       return { screen: 'result', result: r, save }

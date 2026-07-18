@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react'
 import { useGameStore } from '../store/gameStore'
+import { getLevel, nextLevelId } from '../game/levels'
 import { asset } from '../utils/asset'
 import { C } from './theme'
 
@@ -10,6 +11,8 @@ export function ResultScreen() {
   const start = useGameStore((s) => s.start)
   const toMenu = useGameStore((s) => s.toMenu)
   if (!result) return null
+
+  const nextId = nextLevelId(result.levelId)
 
   return (
     <div
@@ -64,11 +67,19 @@ export function ResultScreen() {
           )}
         </div>
 
-        <div style={{ display: 'flex', gap: 14, justifyContent: 'center', marginTop: 22 }}>
-          <button
-            onClick={() => start(result.levelId)}
-            style={btn(C.orange)}
-          >
+        {nextId && (
+          <div style={{ marginTop: 16, fontSize: 14.5, fontWeight: 700, color: C.green }}>
+            🔓 {getLevel(nextId).name} freigeschaltet!
+          </div>
+        )}
+
+        <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 18, flexWrap: 'wrap' }}>
+          {nextId && (
+            <button onClick={() => start(nextId)} style={btn(C.green)}>
+              Weiter ▶
+            </button>
+          )}
+          <button onClick={() => start(result.levelId)} style={btn(C.orange)}>
             Nochmal
           </button>
           <button onClick={toMenu} style={btn(C.blue)}>
