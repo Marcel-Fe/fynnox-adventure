@@ -30,11 +30,16 @@ function useTrees(minX: number, maxX: number): TreeInst[] {
   return useMemo(() => {
     const r = rand(1337)
     const out: TreeInst[] = []
+    // Maßstab: Fynnox ist 2,6 Einheiten hoch. Ein Baum-Grundmodell ist ~3 Einheiten hoch,
+    // d. h. scale 3 ≈ 9 Einheiten ≈ 3,5× Fynnox — so wirkt der Wald wie echter Wald.
+    // Nähere Bänder bewusst größer, damit die Bäume den Spieler überragen.
+    // Groß genug, dass der Wald Fynnox (2,6) überragt — aber bewusst LOCKER gesetzt und
+    // weiter hinten, damit der gemalte Hintergrund zwischen den Stämmen durchscheint.
     const bands = [
-      { z: -34, step: 5.5, s: [2.2, 3.0] },
-      { z: -22, step: 4.8, s: [1.7, 2.4] },
-      { z: -13, step: 4.6, s: [1.3, 1.9] },
-      { z: -7, step: 5.2, s: [1.0, 1.5] },
+      { z: -40, step: 19, s: [5.5, 7.5] },
+      { z: -29, step: 17, s: [4.5, 6.0] },
+      { z: -20, step: 16, s: [3.6, 5.0] },
+      { z: -12, step: 21, s: [3.0, 4.0] },
     ]
     for (const b of bands) {
       for (let x = minX - 14; x <= maxX + 14; x += b.step) {

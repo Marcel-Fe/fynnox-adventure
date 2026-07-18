@@ -22,34 +22,33 @@ export function SplashScreen({ onStart }: { onStart: () => void }) {
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6,
       }}
     >
-      {/* Cover-Kulisse + Verlauf für Kontrast */}
-      <img src={asset('art/previews/wald.png')} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
-      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(120% 85% at 50% 42%, rgba(10,22,40,0.15) 0%, rgba(8,15,30,0.55) 55%, rgba(6,12,26,0.9) 100%)' }} />
+      {/* Unscharfe Kulisse aus demselben Cover → alles wirkt aus einem Guss */}
+      <img
+        src={asset('art/cover.webp')}
+        alt=""
+        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(26px) saturate(1.15)', transform: 'scale(1.15)' }}
+      />
+      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(120% 85% at 50% 45%, rgba(8,16,32,0.25) 0%, rgba(6,12,26,0.72) 60%, rgba(4,9,20,0.92) 100%)' }} />
 
-      {/* Maskottchen im leuchtenden Ring */}
-      <div className="fa-splash-mascot" style={{ position: 'relative', zIndex: 2, width: 190, height: 190, marginBottom: 4 }}>
-        <div className="fa-ring" style={{ position: 'absolute', inset: -12, borderRadius: '50%', border: '3px dashed rgba(255,180,90,0.7)' }} />
-        <div style={{
-          position: 'absolute', inset: 0, borderRadius: '50%', overflow: 'hidden',
-          border: '5px solid rgba(255,255,255,0.92)', boxShadow: '0 16px 46px rgba(0,0,0,0.55), 0 0 60px rgba(255,150,60,0.35)',
-          background: 'radial-gradient(circle at 50% 35%, #cdeeff 0%, #7fb4dd 70%, #5a95c4 100%)',
-        }}>
-          <img src={asset('art/fynnox/portrait.png')} alt="Fynnox" style={{ width: '100%', height: '100%', objectFit: 'contain', transform: 'translateY(2%) scale(1.02)' }} />
-        </div>
+      {/* Das Spiel-Cover als Karte — wie eine Spielhülle */}
+      <div
+        className="fa-splash-mascot"
+        style={{
+          position: 'relative', zIndex: 2, width: 'min(42vh, 300px)', aspectRatio: '1 / 1',
+          borderRadius: 34, overflow: 'hidden',
+          boxShadow: '0 26px 70px rgba(0,0,0,0.65), 0 0 90px rgba(255,170,60,0.28)',
+          border: '3px solid rgba(255,220,140,0.55)',
+        }}
+      >
+        <img src={asset('art/cover.webp')} alt="Fynnox Adventure" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
       </div>
 
-      {/* Logo */}
-      <h1 className="fa-splash-logo" style={{ position: 'relative', zIndex: 2, margin: 0, textAlign: 'center', fontWeight: 900, lineHeight: 0.95, textShadow: '0 5px 0 rgba(0,0,0,0.32)' }}>
-        <span style={{ display: 'block', fontSize: 58, letterSpacing: 1 }}>Fynnox</span>
-        <span style={{ display: 'block', fontSize: 58, letterSpacing: 1, color: C.orange }}>Adventure</span>
-      </h1>
-
-      <p className="fa-splash-tag" style={{ position: 'relative', zIndex: 2, margin: '6px 0 0', fontSize: 17, fontWeight: 600, color: '#eaf6ff', textShadow: '0 2px 8px rgba(0,0,0,0.7)' }}>
+      <p className="fa-splash-tag" style={{ position: 'relative', zIndex: 2, margin: '18px 0 0', fontSize: 17, fontWeight: 700, color: '#eaf6ff', textShadow: '0 2px 8px rgba(0,0,0,0.8)' }}>
         Ein Fuchs. Fünf Welten. Ein großes Abenteuer. 🦊
       </p>
 
       {/* Start-Button */}
-      <div className="fa-splash-cta" style={{ position: 'relative', zIndex: 2, marginTop: 22 }}>
+      <div className="fa-splash-cta" style={{ position: 'relative', zIndex: 2, marginTop: 18 }}>
         <button
           className="fa-splash-cta-pulse"
           onClick={(e) => { e.stopPropagation(); go() }}

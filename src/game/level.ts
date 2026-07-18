@@ -19,6 +19,28 @@ export interface QuestDef {
   thanks: string // Reaktion nach Abgabe beim NPC
 }
 
+// Weitere Sammelobjekte neben den Pfotenmünzen (alle rein additiv).
+export interface Pickup {
+  x: number
+  y: number
+}
+
+// Sprungfeder: echte Mechanik — Fynnox wird beim Auftreffen hoch katapultiert.
+export interface Spring {
+  x: number
+  y: number
+  power?: number // Sprungkraft (Standard 26)
+}
+
+// Eine Figur in der Welt. Ohne `model` dient das getönte Fynnox-Modell als Platzhalter.
+export interface NpcDefData {
+  x: number
+  model?: string
+  tint?: string
+  scale?: number
+  lines: string[] // Sprüche, die die Figur bei Annäherung zeigt (wechseln durch)
+}
+
 export interface LevelDef {
   id: string
   name: string
@@ -28,6 +50,10 @@ export interface LevelDef {
   platforms: Platform[]
   coins: Coin[]
   checkpoints: number[] // x-Positionen der Checkpoint-Flaggen
+  gems?: Pickup[] // wertvoller als Münzen
+  stars?: Pickup[] // versteckte Sterne (3 pro Level, wie im klassischen Platformer)
+  springs?: Spring[]
+  npcs?: NpcDefData[] // weitere Figuren (reine Deko/Dialog, keine Quest)
   quest?: QuestDef
   bg?: string // gemalter Parallax-Hintergrund (Pfad unter public/); ersetzt die prozeduralen Hügel
 }
@@ -39,25 +65,74 @@ export const FOREST_LEVEL: LevelDef = {
   name: 'Wald 1-1',
   world: 'forest',
   startX: -6,
-  goalX: 62,
+  goalX: 138,
   platforms: [
+    // Abschnitt 1 — sanfter Einstieg
     { x: 6, y: 1.6, w: 4, h: 0.6 },
     { x: 13, y: 3.0, w: 3.5, h: 0.6 },
     { x: 19, y: 4.4, w: 3.5, h: 0.6 },
     { x: 26, y: 3.0, w: 4, h: 0.6 },
     { x: 33, y: 1.8, w: 4, h: 0.6 },
+    // Abschnitt 2 — Treppe hoch zum ersten Stern
     { x: 41, y: 2.6, w: 3.5, h: 0.6 },
     { x: 48, y: 4.0, w: 3.5, h: 0.6 },
-    { x: 55, y: 2.2, w: 4, h: 0.6 },
+    { x: 54, y: 5.6, w: 3, h: 0.6 },
+    { x: 60, y: 7.0, w: 3, h: 0.6 },
+    { x: 67, y: 4.6, w: 4, h: 0.6 },
+    // Abschnitt 3 — weite Sprünge über die Senke (Sprungfedern helfen)
+    { x: 75, y: 2.4, w: 3, h: 0.6 },
+    { x: 82, y: 3.6, w: 3, h: 0.6 },
+    { x: 89, y: 5.2, w: 3, h: 0.6 },
+    { x: 96, y: 6.8, w: 3.5, h: 0.6 },
+    // Abschnitt 4 — Finale
+    { x: 104, y: 4.4, w: 4, h: 0.6 },
+    { x: 112, y: 2.8, w: 4, h: 0.6 },
+    { x: 120, y: 4.2, w: 3.5, h: 0.6 },
+    { x: 128, y: 5.8, w: 3.5, h: 0.6 },
   ],
   coins: [
-    { x: -3, y: 1.1 }, { x: 1, y: 1.1 },
-    { x: 7.5, y: 2.7 }, { x: 14.5, y: 4.1 }, { x: 20.5, y: 5.5 },
-    { x: 27.5, y: 4.1 }, { x: 30, y: 1.1 }, { x: 37, y: 1.1 },
-    { x: 42.5, y: 3.7 }, { x: 49.5, y: 5.1 }, { x: 56.5, y: 3.3 },
-    { x: 59, y: 1.1 },
+    { x: -3, y: 1.1 }, { x: 1, y: 1.1 }, { x: 3.5, y: 1.1 },
+    { x: 7.5, y: 2.7 }, { x: 10, y: 1.1 }, { x: 14.5, y: 4.1 },
+    { x: 17, y: 1.1 }, { x: 20.5, y: 5.5 }, { x: 23, y: 1.1 },
+    { x: 27.5, y: 4.1 }, { x: 30, y: 1.1 }, { x: 34.5, y: 2.9 },
+    { x: 37, y: 1.1 }, { x: 42.5, y: 3.7 }, { x: 45, y: 1.1 },
+    { x: 49.5, y: 5.1 }, { x: 55.5, y: 6.7 }, { x: 61.5, y: 8.1 },
+    { x: 64, y: 1.1 }, { x: 68.5, y: 5.7 }, { x: 71, y: 1.1 },
+    { x: 76.5, y: 3.5 }, { x: 83.5, y: 4.7 }, { x: 86, y: 1.1 },
+    { x: 90.5, y: 6.3 }, { x: 97.5, y: 7.9 }, { x: 100, y: 1.1 },
+    { x: 105.5, y: 5.5 }, { x: 108, y: 1.1 }, { x: 113.5, y: 3.9 },
+    { x: 116, y: 1.1 }, { x: 121.5, y: 5.3 }, { x: 124, y: 1.1 },
+    { x: 129.5, y: 6.9 }, { x: 134, y: 1.1 },
   ],
-  checkpoints: [20, 42],
+  // Wertvolle Kristalle — abseits des direkten Wegs, laden zum Erkunden ein
+  gems: [
+    { x: 21, y: 7.2 }, { x: 61.5, y: 9.6 }, { x: 90.5, y: 8.4 }, { x: 129.5, y: 8.6 },
+  ],
+  // Drei versteckte Sterne (hoch oben — nur über die Sprungfedern erreichbar)
+  stars: [
+    { x: 30, y: 8.4 }, { x: 79, y: 8.8 }, { x: 118, y: 9.2 },
+  ],
+  // Sprungfedern: katapultieren Fynnox hoch zu den Sternen
+  springs: [
+    { x: 30, y: 0.35 }, { x: 79, y: 0.35 }, { x: 118, y: 0.35 },
+  ],
+  checkpoints: [40, 74, 110],
+  // Bewohner der Welt. Noch Platzhalter (umgefärbtes/skaliertes Fynnox-Modell), bis
+  // eigene Figuren-GLBs vorliegen — Pipeline: docs/npc-pipeline.md.
+  npcs: [
+    {
+      x: 36, tint: '#8f7bd4', scale: 0.82,
+      lines: ['Pass auf die Lücke auf!', 'Die Sprungfedern bringen dich ganz nach oben. ⭐', 'Hinter dem Hügel liegen Kristalle.'],
+    },
+    {
+      x: 72, tint: '#5fbf8a', scale: 1.05,
+      lines: ['Drei Sterne sind im Wald versteckt. ⭐', 'Ich habe einen davon oben glitzern sehen!', 'Ruh dich ruhig kurz aus.'],
+    },
+    {
+      x: 116, tint: '#d99a5c', scale: 0.9,
+      lines: ['Nicht mehr weit bis zur Flagge! 🚩', 'Die Kristalle sind wertvoll — sammle sie ein. 💎', 'Du schaffst das, Fynnox!'],
+    },
+  ],
   bg: 'art/bg/wald/far.webp',
   quest: {
     npcX: 2,

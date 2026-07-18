@@ -12,7 +12,9 @@ import { Player } from './Player'
 import { Platforms } from './Platforms'
 import { Coins } from './Coins'
 import { Checkpoints, Goal } from './Flags'
+import { Gems, Stars, Springs } from './Pickups'
 import { Npc } from './Npc'
+import { Villager } from './Villager'
 import type { LevelDef } from './level'
 
 // Hochwertige 2,5D-3D-Bühne (Diorama/„New Super Mario Bros"-Anmutung): weiche Beleuchtung
@@ -81,8 +83,12 @@ export function AdventureScene({ level }: { level: LevelDef }) {
       <Platforms platforms={level.platforms} />
       <Suspense fallback={null}>
         <Coins coins={level.coins} />
+        {level.gems && <Gems gems={level.gems} />}
+        {level.stars && <Stars stars={level.stars} />}
+        {level.springs && <Springs springs={level.springs} />}
         <Checkpoints positions={level.checkpoints} />
         <Goal x={level.goalX} />
+        {level.npcs?.map((n, i) => <Villager key={i} def={n} />)}
         {level.quest && (
           <Npc
             def={{ x: level.quest.npcX, model: level.quest.npcModel, tint: level.quest.npcTint }}

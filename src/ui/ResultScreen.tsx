@@ -45,9 +45,23 @@ export function ResultScreen() {
           ))}
         </div>
 
-        <div style={{ fontSize: 20, fontWeight: 800, color: C.navy, display: 'flex', gap: 8, justifyContent: 'center', alignItems: 'center' }}>
-          <img src={asset('art/items/paw_coin.png')} width={28} height={28} alt="" />
-          {result.coins} / {result.totalCoins} Pfotenmünzen
+        <div style={{ display: 'flex', gap: 18, justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap', fontSize: 19, fontWeight: 800, color: C.navy }}>
+          <span style={{ display: 'flex', gap: 7, alignItems: 'center' }}>
+            <img src={asset('art/items/paw_coin.png')} width={28} height={28} alt="" />
+            {result.coins} / {result.totalCoins}
+          </span>
+          {(result.totalGems ?? 0) > 0 && (
+            <span style={{ display: 'flex', gap: 7, alignItems: 'center' }}>
+              <img src={asset('art/items/gem.png')} width={26} height={26} alt="" />
+              {result.gems ?? 0} / {result.totalGems}
+            </span>
+          )}
+          {(result.totalStars ?? 0) > 0 && (
+            <span style={{ display: 'flex', gap: 7, alignItems: 'center' }}>
+              <img src={asset('art/items/star.png')} width={26} height={26} alt="" />
+              {result.foundStars ?? 0} / {result.totalStars}
+            </span>
+          )}
         </div>
 
         <div style={{ display: 'flex', gap: 14, justifyContent: 'center', marginTop: 22 }}>

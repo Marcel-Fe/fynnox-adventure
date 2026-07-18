@@ -8,6 +8,10 @@ export interface RunResult {
   stars: number
   coins: number
   totalCoins: number // Münzen im Level insgesamt (für Anzeige „x / y")
+  gems?: number
+  totalGems?: number
+  foundStars?: number // gefundene versteckte Sterne
+  totalStars?: number
 }
 
 interface GameState {
@@ -15,12 +19,16 @@ interface GameState {
   levelId: string
   runId: number // erhöht sich bei jedem Start → erzwingt frischen Canvas/Level
   coins: number // im aktuellen Lauf gesammelt
+  gems: number // wertvolle Kristalle im aktuellen Lauf
+  stars: number // gefundene versteckte Sterne (max. 3)
   questDone: boolean // Aufgabe des Level-NPCs erfüllt (bei NPC abgegeben)
   result: RunResult | null
   save: SaveData
 
   start: (levelId: string) => void
   addCoin: () => void
+  addGem: () => void
+  addStar: () => void
   completeQuest: () => void
   finish: (r: RunResult) => void
   toMenu: () => void
@@ -33,13 +41,20 @@ export const useGameStore = create<GameState>((set) => ({
   levelId: 'wald-1',
   runId: 0,
   coins: 0,
+  gems: 0,
+  stars: 0,
   questDone: false,
   result: null,
   save: loadSave(),
 
-  start: (levelId) => set((s) => ({ screen: 'play', levelId, coins: 0, questDone: false, result: null, runId: s.runId + 1 })),
+  start: (levelId) =>
+    set((s) => ({ screen: 'play', levelId, coins: 0, gems: 0, stars: 0, questDone: false, result: null, runId: s.runId + 1 })),
 
   addCoin: () => set((s) => ({ coins: s.coins + 1 })),
+
+  addGem: () => set((s) => ({ gems: s.gems + 1 })),
+
+  addStar: () => set((s) => ({ stars: s.stars + 1 })),
 
   completeQuest: () => set({ questDone: true }),
 

@@ -38,7 +38,16 @@ export function Player({ level }: { level: LevelDef }) {
       finished.current = true
       const st = useGameStore.getState()
       const stars = computeStars(st.coins, level.coins.length)
-      st.finish({ levelId: level.id, stars, coins: st.coins, totalCoins: level.coins.length })
+      st.finish({
+        levelId: level.id,
+        stars,
+        coins: st.coins,
+        totalCoins: level.coins.length,
+        gems: st.gems,
+        totalGems: level.gems?.length ?? 0,
+        foundStars: st.stars,
+        totalStars: level.stars?.length ?? 0,
+      })
     }
 
     if (g.current) g.current.position.set(player.x, player.y, 0)

@@ -32,9 +32,11 @@ function useHouses(minX: number, maxX: number): HouseInst[] {
     const r = rand(70707)
     const out: HouseInst[] = []
     // Zwei Tiefen-Bänder: näheres Dorf (deutlich) + fernere Häuser (Dunst/Tiefe).
+    // Maßstab passend zu Fynnox (2,6) und den Bäumen: Haus-Grundmodell ist ~4 Einheiten
+    // hoch → scale 2 ≈ 8 Einheiten, also ein richtiges Haus, kein Puppenhaus.
     const bands = [
-      { z: -15, step: 15, s: [1.0, 1.35], jitter: 5 },
-      { z: -27, step: 21, s: [1.25, 1.7], jitter: 8 },
+      { z: -15, step: 26, s: [1.9, 2.4], jitter: 7 },
+      { z: -27, step: 34, s: [2.4, 3.1], jitter: 10 },
     ]
     for (const b of bands) {
       for (let x = minX + 4; x <= maxX; x += b.step) {

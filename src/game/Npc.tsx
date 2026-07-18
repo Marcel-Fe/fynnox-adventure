@@ -23,6 +23,7 @@ export interface NpcDef {
   x: number
   model?: string // GLB-Dateiname unter public/models/ (ohne Pfad)
   tint?: string // Einfärbung des Platzhalter-Modells
+  scale?: number // Größe relativ zur Standardhöhe (z. B. 0.8 = kleinere Figur)
 }
 
 export interface NpcQuest {
@@ -51,8 +52,8 @@ export function Npc({ def, quest }: { def: NpcDef; quest: NpcQuest }) {
         // Platzhalter (Fynnox-Modell) leicht kühler tönen → als andere Figur erkennbar.
         // Eigene GLBs bleiben unverfälscht, außer es wird bewusst getönt.
         if (isFallback || def.tint) {
-          mat.color.multiplyScalar(0.85)
-          mat.color.lerp(new THREE.Color(def.tint ?? '#8fb0e0'), 0.5)
+          // kräftig umfärben — sonst wirkt die Figur wie ein zweiter Fynnox
+          mat.color.lerp(new THREE.Color(def.tint ?? '#8fb0e0'), 0.72)
         }
         mesh.material = mat
         mesh.castShadow = true
@@ -66,9 +67,9 @@ export function Npc({ def, quest }: { def: NpcDef; quest: NpcQuest }) {
     const box = new THREE.Box3().setFromObject(model)
     const size = new THREE.Vector3()
     box.getSize(size)
-    const s = TARGET_H / (size.y || 1)
+    const s = (TARGET_H * (def.scale ?? 1)) / (size.y || 1)
     return { scaleV: s, yOff: -box.min.y * s }
-  }, [model])
+  }, [model, def.scale])
 
   const head = useMemo(() => model.getObjectByName('Head'), [model])
   const rArm = useMemo(() => model.getObjectByName('R_Upperarm'), [model])
