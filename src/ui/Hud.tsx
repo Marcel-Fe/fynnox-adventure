@@ -19,20 +19,20 @@ export function Hud() {
       <div style={{ position: 'fixed', left: 16, top: 14, display: 'flex', gap: 10 }}>
         <div style={{ padding: '8px 16px 8px 10px', fontSize: 20, ...pill }}>
           <img src={asset('art/items/paw_coin.png')} width={30} height={30} alt="" style={{ display: 'block' }} />
-          <span style={{ color: C.yellow }}>{coins}</span>
+          <span key={coins} className="fa-count" style={{ color: C.yellow }}>{coins}</span>
           <span style={{ opacity: 0.5, fontSize: 15 }}>/ {total}</span>
         </div>
         {gemTotal > 0 && (
           <div style={{ padding: '8px 14px 8px 9px', fontSize: 20, ...pill }}>
             <img src={asset('art/items/gem.png')} width={26} height={26} alt="" style={{ display: 'block' }} />
-            <span style={{ color: '#9fd8ff' }}>{gems}</span>
+            <span key={gems} className="fa-count" style={{ color: '#9fd8ff' }}>{gems}</span>
             <span style={{ opacity: 0.5, fontSize: 15 }}>/ {gemTotal}</span>
           </div>
         )}
         {starTotal > 0 && (
           <div style={{ padding: '8px 14px 8px 9px', fontSize: 20, ...pill }}>
             <img src={asset('art/items/star.png')} width={26} height={26} alt="" style={{ display: 'block' }} />
-            <span style={{ color: C.yellow }}>{stars}</span>
+            <span key={stars} className="fa-count" style={{ color: C.yellow }}>{stars}</span>
             <span style={{ opacity: 0.5, fontSize: 15 }}>/ {starTotal}</span>
           </div>
         )}

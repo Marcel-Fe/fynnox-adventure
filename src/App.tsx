@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { AdventureScene } from './game/AdventureScene'
 import { Hud } from './ui/Hud'
@@ -10,17 +10,32 @@ import { RotateHint } from './ui/RotateHint'
 import { MuteButton } from './ui/MuteButton'
 import { attachKeyboard } from './game/controls'
 import { player } from './game/playerState'
+import { shake } from './game/fx'
 import { useGameStore } from './store/gameStore'
 import { getLevel } from './game/levels'
 import { initMusic } from './audio/music'
 
 // Strikte Seitenkamera: fest in Z/Y, folgt Fynnox nur in X (2,5D).
+// Zusätzlich: schaut in Laufrichtung voraus und rüttelt kurz bei harten Landungen /
+// starken Effekten — das macht die Bewegung spürbar dynamischer.
 function CameraFollow() {
   const { camera } = useThree()
+  const lead = useRef(0)
   useFrame((_, delta) => {
     const dt = Math.min(delta, 0.05)
-    camera.position.x += (player.x - camera.position.x) * Math.min(1, dt * 4)
-    camera.lookAt(camera.position.x, 3, 0)
+    // Vorausschau in Laufrichtung (weich nachgeführt, damit es nicht ruckt)
+    const targetLead = Math.max(-3, Math.min(3, player.vx * 0.28))
+    lead.current += (targetLead - lead.current) * Math.min(1, dt * 3)
+
+    camera.position.x += (player.x + lead.current - camera.position.x) * Math.min(1, dt * 4)
+
+    // Rüttler abklingen lassen
+    shake.amount *= Math.max(0, 1 - dt * 6)
+    const s = shake.amount
+    const ox = s > 0.001 ? (Math.random() - 0.5) * s : 0
+    const oy = s > 0.001 ? (Math.random() - 0.5) * s : 0
+    camera.position.y = 4.4 + oy
+    camera.lookAt(camera.position.x + ox, 3 + oy, 0)
   })
   return null
 }

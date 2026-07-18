@@ -5,6 +5,7 @@ import * as THREE from 'three'
 import { asset } from '../utils/asset'
 import { player } from './playerState'
 import { useGameStore } from '../store/gameStore'
+import { burst, addShake } from './fx'
 import type { Pickup, Spring } from './level'
 
 // Weitere Sammelobjekte (Artwork-Sprites) und die Sprungfeder als echte Mechanik.
@@ -36,6 +37,8 @@ export function Gems({ gems }: { gems: Pickup[] }) {
       if (reached(gems[i].x, gems[i].y, 2.2)) {
         got.current[i] = true
         s.visible = false
+        burst('gem', gems[i].x, gems[i].y)
+        addShake(0.12)
         addGem()
       }
     }
@@ -70,6 +73,8 @@ export function Stars({ stars }: { stars: Pickup[] }) {
       if (reached(stars[i].x, stars[i].y, 2.6)) {
         got.current[i] = true
         s.visible = false
+        burst('star', stars[i].x, stars[i].y)
+        addShake(0.25)
         addStar()
       }
     }
@@ -105,6 +110,8 @@ export function Springs({ springs }: { springs: Spring[] }) {
         player.vy = sp.power ?? 26
         player.onGround = false
         squash.current[i] = 1
+        burst('spring', sp.x, sp.y + 0.3)
+        addShake(0.18)
       }
       squash.current[i] = Math.max(0, squash.current[i] - delta * 3.5)
       const q = squash.current[i]

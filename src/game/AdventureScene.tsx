@@ -7,6 +7,7 @@ import { Scenery } from '../render/Scenery'
 import { Houses } from '../render/Houses'
 import { Backdrop } from '../render/Parallax3D'
 import { Life } from '../render/Life'
+import { Fx } from '../render/Fx'
 import { Water } from '../render/Water'
 import { makeGrassTexture } from '../render/paint'
 import { Player } from './Player'
@@ -106,6 +107,9 @@ export function AdventureScene({ level }: { level: LevelDef }) {
         )}
         <Player level={level} />
       </Suspense>
+
+      {/* Effekt-Ebene ganz vorn: Funken, Staub, Glitzer */}
+      <Fx />
 
       <EffectComposer enableNormalPass={false}>
         <Bloom intensity={0.5} luminanceThreshold={0.82} luminanceSmoothing={0.3} mipmapBlur />
