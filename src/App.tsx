@@ -6,6 +6,7 @@ import { TouchControls } from './ui/TouchControls'
 import { MainMenu } from './ui/MainMenu'
 import { SplashScreen } from './ui/SplashScreen'
 import { ResultScreen } from './ui/ResultScreen'
+import { StoryPanel } from './ui/StoryPanel'
 import { RotateHint } from './ui/RotateHint'
 import { MuteButton } from './ui/MuteButton'
 import { attachKeyboard } from './game/controls'
@@ -72,6 +73,16 @@ export default function App() {
   const [entered, setEntered] = useState(false)
   useEffect(() => attachKeyboard(), [])
   useEffect(() => initMusic(), [])
+
+  // Story-Kapitel läuft ohne 3D-Szene — spart Akku und lädt schneller.
+  if (screen === 'story') {
+    return (
+      <>
+        <StoryPanel />
+        <RotateHint />
+      </>
+    )
+  }
 
   if (screen === 'menu') {
     return (

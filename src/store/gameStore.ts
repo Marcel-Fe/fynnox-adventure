@@ -1,7 +1,9 @@
 import { create } from 'zustand'
 import { loadSave, writeSave, type SaveData } from '../save/save'
+import { storyFor, type StoryKind } from '../data/story'
+import { nextLevelId } from '../game/levels'
 
-export type Screen = 'menu' | 'play' | 'result'
+export type Screen = 'menu' | 'play' | 'result' | 'story'
 
 export interface RunResult {
   levelId: string
@@ -26,8 +28,12 @@ interface GameState {
   chestOpen: boolean // Truhe bereits geöffnet
   result: RunResult | null
   save: SaveData
+  pendingStory: { levelId: string; kind: StoryKind } | null
 
   start: (levelId: string) => void
+  beginLevel: (levelId: string) => void // wie start, zeigt aber vorher das Story-Kapitel
+  afterLevel: (levelId: string) => void // „Weiter" nach dem Ziel: Story → nächstes Level
+  storyContinue: () => void
   addCoin: () => void
   addGem: () => void
   addStar: () => void
@@ -40,7 +46,7 @@ interface GameState {
 
 // Nur seltene Zustände (HUD/Screens). Spielerposition läuft über playerState
 // (kein React) → keine Re-Renders pro Frame.
-export const useGameStore = create<GameState>((set) => ({
+export const useGameStore = create<GameState>((set, get) => ({
   screen: 'menu',
   levelId: 'wald-1',
   runId: 0,
@@ -52,9 +58,53 @@ export const useGameStore = create<GameState>((set) => ({
   chestOpen: false,
   result: null,
   save: loadSave(),
+  pendingStory: null,
 
   start: (levelId) =>
-    set((s) => ({ screen: 'play', levelId, coins: 0, gems: 0, stars: 0, questDone: false, hasKey: false, chestOpen: false, result: null, runId: s.runId + 1 })),
+    set((s) => ({ screen: 'play', levelId, coins: 0, gems: 0, stars: 0, questDone: false, hasKey: false, chestOpen: false, result: null, pendingStory: null, runId: s.runId + 1 })),
+
+  // Einstieg über das Menü: erst das Story-Kapitel (falls es eines gibt und es noch
+  // nicht gezeigt wurde), dann das Level. Beim Wiederholen kommt kein Panel mehr.
+  beginLevel: (levelId) => {
+    const s = get()
+    if (storyFor(levelId, 'intro') && !s.save.seenStory[`${levelId}:intro`]) {
+      set({ screen: 'story', pendingStory: { levelId, kind: 'intro' } })
+    } else {
+      s.start(levelId)
+    }
+  },
+
+  // Nach dem Ziel: Abschluss-Kapitel zeigen, sonst direkt ins nächste Level.
+  afterLevel: (levelId) => {
+    const s = get()
+    if (storyFor(levelId, 'outro') && !s.save.seenStory[`${levelId}:outro`]) {
+      set({ screen: 'story', pendingStory: { levelId, kind: 'outro' } })
+      return
+    }
+    const nxt = nextLevelId(levelId)
+    if (nxt) s.beginLevel(nxt)
+    else s.toMenu()
+  },
+
+  storyContinue: () => {
+    const p = get().pendingStory
+    if (!p) {
+      get().toMenu()
+      return
+    }
+    const s = get()
+    const save: SaveData = { ...s.save, seenStory: { ...s.save.seenStory, [`${p.levelId}:${p.kind}`]: true } }
+    writeSave(save)
+    set({ save, pendingStory: null })
+
+    if (p.kind === 'intro') {
+      get().start(p.levelId)
+    } else {
+      const nxt = nextLevelId(p.levelId)
+      if (nxt) get().beginLevel(nxt)
+      else get().toMenu()
+    }
+  },
 
   addCoin: () => set((s) => ({ coins: s.coins + 1 })),
 
@@ -81,7 +131,7 @@ export const useGameStore = create<GameState>((set) => ({
       return { screen: 'result', result: r, save }
     }),
 
-  toMenu: () => set({ screen: 'menu', result: null }),
+  toMenu: () => set({ screen: 'menu', result: null, pendingStory: null }),
 }))
 
 // Dev-Hilfe: Store im Browser inspizierbar (für automatisierte Tests).

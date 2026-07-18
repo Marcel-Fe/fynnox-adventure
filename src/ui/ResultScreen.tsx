@@ -9,6 +9,7 @@ import { C } from './theme'
 export function ResultScreen() {
   const result = useGameStore((s) => s.result)
   const start = useGameStore((s) => s.start)
+  const afterLevel = useGameStore((s) => s.afterLevel)
   const toMenu = useGameStore((s) => s.toMenu)
   if (!result) return null
 
@@ -74,11 +75,9 @@ export function ResultScreen() {
         )}
 
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 18, flexWrap: 'wrap' }}>
-          {nextId && (
-            <button onClick={() => start(nextId)} style={btn(C.green)}>
-              Weiter ▶
-            </button>
-          )}
+          <button onClick={() => afterLevel(result.levelId)} style={btn(C.green)}>
+            Weiter ▶
+          </button>
           <button onClick={() => start(result.levelId)} style={btn(C.orange)}>
             Nochmal
           </button>

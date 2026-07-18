@@ -17,7 +17,7 @@ const SUBTITLE: Record<string, string> = {
 
 export function LevelSelect({ worldKey, onClose }: { worldKey: string; onClose: () => void }) {
   const save = useGameStore((s) => s.save)
-  const start = useGameStore((s) => s.start)
+  const beginLevel = useGameStore((s) => s.beginLevel)
   const group = WORLD_GROUPS.find((w) => w.key === worldKey)
   if (!group) return null
 
@@ -48,7 +48,7 @@ export function LevelSelect({ worldKey, onClose }: { worldKey: string; onClose: 
               key={id}
               className="fa-card"
               disabled={!open}
-              onClick={() => open && start(id)}
+              onClick={() => open && beginLevel(id)}
               style={{
                 width: 218, borderRadius: 20, padding: '16px 16px 14px', textAlign: 'left', color: '#fff',
                 background: open ? 'linear-gradient(165deg, rgba(255,255,255,0.16), rgba(255,255,255,0.05))' : 'rgba(255,255,255,0.06)',

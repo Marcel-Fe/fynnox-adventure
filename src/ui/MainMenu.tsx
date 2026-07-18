@@ -50,7 +50,7 @@ function HeaderMute() {
 }
 
 export function MainMenu() {
-  const start = useGameStore((s) => s.start)
+  const beginLevel = useGameStore((s) => s.beginLevel)
   const save = useGameStore((s) => s.save)
   const [openWorld, setOpenWorld] = useState<string | null>(null)
   const totalStars = Object.values(save.bestStars).reduce((a, b) => a + b, 0)
@@ -126,7 +126,7 @@ export function MainMenu() {
         <nav style={{ position: 'absolute', right: 26, top: '8%', width: 300, display: 'flex', flexDirection: 'column', gap: 12 }}>
           <button
             className="fa-cta"
-            onClick={() => start(continueId)}
+            onClick={() => beginLevel(continueId)}
             style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, background: C.orange, color: '#fff', fontSize: 24, fontWeight: 900, border: 'none', borderRadius: 18, padding: '18px 0', cursor: 'pointer', boxShadow: '0 7px 0 #b64d13' }}
           >
             ▶ Spielen
