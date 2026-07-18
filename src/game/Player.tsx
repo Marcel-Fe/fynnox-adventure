@@ -4,13 +4,14 @@ import * as THREE from 'three'
 import { FynnoxModel } from './Fynnox3D'
 import { player, resetPlayer, respawnAtCheckpoint } from './playerState'
 import { controls } from './controls'
-import { stepPlayer } from './physics'
+import { stepPlayer, type Platform } from './physics'
 import { useGameStore } from '../store/gameStore'
-import { computeStars, type LevelDef } from './level'
+import { computeStars, totalGemCount, type LevelDef } from './level'
 
 // Bewegt Fynnox über die Physik, kümmert sich um Sturz-Respawn (letzter Checkpoint)
 // und Ziel-Erkennung (→ Ergebnis-Screen mit Sternebewertung).
-export function Player({ level }: { level: LevelDef }) {
+// `platforms` enthält feste UND bewegliche Plattformen; ohne Angabe nur die festen.
+export function Player({ level, platforms }: { level: LevelDef; platforms?: Platform[] }) {
   const g = useRef<THREE.Group>(null)
   const finished = useRef(false)
 
@@ -26,7 +27,7 @@ export function Player({ level }: { level: LevelDef }) {
     stepPlayer(
       player,
       { left: controls.left, right: controls.right, jump: controls.jump, dash: controls.dash },
-      level.platforms,
+      platforms ?? level.platforms,
       dt,
     )
     controls.jump = false
@@ -44,7 +45,7 @@ export function Player({ level }: { level: LevelDef }) {
         coins: st.coins,
         totalCoins: level.coins.length,
         gems: st.gems,
-        totalGems: level.gems?.length ?? 0,
+        totalGems: totalGemCount(level),
         foundStars: st.stars,
         totalStars: level.stars?.length ?? 0,
       })

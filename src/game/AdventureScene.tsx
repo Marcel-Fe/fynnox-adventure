@@ -12,13 +12,17 @@ import { Water } from '../render/Water'
 import { makeGrassTexture } from '../render/paint'
 import { Player } from './Player'
 import { Platforms } from './Platforms'
+import { MovingPlatforms, buildMovers } from './MovingPlatforms'
 import { Coins } from './Coins'
 import { Checkpoints, Goal } from './Flags'
 import { Gems, Stars, Springs } from './Pickups'
 import { Npc } from './Npc'
 import { Villager } from './Villager'
 import { SpriteNpc } from './SpriteNpc'
-import type { LevelDef } from './level'
+import type { LevelDef, MoverDef } from './level'
+
+// Stabile Referenz für Level ohne bewegliche Plattformen (sonst neues Array je Render).
+const EMPTY_MOVERS: MoverDef[] = []
 
 // Hochwertige 2,5D-3D-Bühne (Diorama/„New Super Mario Bros"-Anmutung): weiche Beleuchtung
 // + Environment für runde Formen, plastische Plattformen, 3D-Tiefen-Wald mit Nebel,
@@ -46,6 +50,12 @@ export function AdventureScene({ level }: { level: LevelDef }) {
     ;(window as unknown as { __scene?: unknown; __cam?: unknown }).__scene = scene
     ;(window as unknown as { __scene?: unknown; __cam?: unknown }).__cam = camera
   }, [scene, camera])
+
+  // Bewegliche Plattformen: einmal je Level erzeugt und dann PRO FRAME MUTIERT.
+  // Sie landen im selben Array wie die festen Plattformen → die Physik trägt sie mit.
+  const movers = level.movers ?? EMPTY_MOVERS
+  const liveMovers = useMemo(() => buildMovers(movers), [movers])
+  const allPlatforms = useMemo(() => [...level.platforms, ...liveMovers], [level.platforms, liveMovers])
 
   return (
     <>
@@ -91,6 +101,7 @@ export function AdventureScene({ level }: { level: LevelDef }) {
       <Life minX={level.startX} maxX={level.goalX} />
 
       <Platforms platforms={level.platforms} />
+      <MovingPlatforms defs={movers} live={liveMovers} />
       <Suspense fallback={null}>
         <Coins coins={level.coins} />
         {level.gems && <Gems gems={level.gems} />}
@@ -105,7 +116,7 @@ export function AdventureScene({ level }: { level: LevelDef }) {
             quest={{ total: level.coins.length, ask: level.quest.ask, ready: level.quest.ready, thanks: level.quest.thanks }}
           />
         )}
-        <Player level={level} />
+        <Player level={level} platforms={allPlatforms} />
       </Suspense>
 
       {/* Effekt-Ebene ganz vorn: Funken, Staub, Glitzer */}

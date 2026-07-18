@@ -32,6 +32,27 @@ export interface Spring {
   power?: number // Sprungkraft (Standard 26)
 }
 
+// Bewegliche Plattform: pendelt auf einer Achse um ihre Ausgangsposition.
+// Aus jeder Definition entsteht zur Laufzeit ein echtes `Platform`-Objekt, dessen x/y
+// je Frame VOR dem Physik-Schritt mutiert wird — die Physik selbst bleibt unverändert.
+export interface MoverDef {
+  x: number
+  y: number
+  w: number
+  h: number
+  axis: 'x' | 'y'
+  range: number // Ausschlag in Einheiten (± range um die Ausgangsposition)
+  speed: number // Winkelgeschwindigkeit (rad/s); 1.0 ≈ ein Hin-und-Zurück in ~6 s
+  phase?: number // Startpunkt der Pendelbewegung (rad) — versetzt mehrere Plattformen
+}
+
+// Schatztruhe: öffnet sich erst mit dem Schlüssel und schüttet Kristalle aus.
+export interface ChestDef {
+  x: number
+  y: number
+  gems: number // Belohnung; zählt in die Kristall-Gesamtzahl des Levels mit
+}
+
 // Eine Figur in der Welt. Ohne `model` dient das getönte Fynnox-Modell als Platzhalter.
 export interface NpcDefData {
   x: number
@@ -56,6 +77,9 @@ export interface LevelDef {
   gems?: Pickup[] // wertvoller als Münzen
   stars?: Pickup[] // versteckte Sterne (3 pro Level, wie im klassischen Platformer)
   springs?: Spring[]
+  movers?: MoverDef[] // bewegliche Plattformen
+  key?: Pickup // Schlüssel zur Truhe
+  chest?: ChestDef // Schatztruhe (braucht den Schlüssel)
   npcs?: NpcDefData[] // weitere Figuren (reine Deko/Dialog, keine Quest)
   quest?: QuestDef
   bg?: string // gemalter Parallax-Hintergrund (Pfad unter public/); ersetzt die prozeduralen Hügel
@@ -119,6 +143,13 @@ export const FOREST_LEVEL: LevelDef = {
   springs: [
     { x: 30, y: 0.35 }, { x: 79, y: 0.35 }, { x: 118, y: 0.35 },
   ],
+  // Bewegliche Holz-Plattformen als bequeme Zweitwege über die drei Senken.
+  // Bewusst zusätzlich zu den festen Plattformen — die Balance bleibt unverändert.
+  movers: [
+    { x: 71.5, y: 3.2, w: 3, h: 0.5, axis: 'y', range: 1.8, speed: 1.1 },
+    { x: 99.5, y: 6.0, w: 3, h: 0.5, axis: 'x', range: 3.5, speed: 0.8, phase: 1.2 },
+    { x: 132.5, y: 5.0, w: 3, h: 0.5, axis: 'y', range: 2.2, speed: 0.9, phase: 0.6 },
+  ],
   checkpoints: [40, 74, 110],
   // Bewohner der Welt. Noch Platzhalter (umgefärbtes/skaliertes Fynnox-Modell), bis
   // eigene Figuren-GLBs vorliegen — Pipeline: docs/npc-pipeline.md.
@@ -145,6 +176,12 @@ export const FOREST_LEVEL: LevelDef = {
     ready: 'Toll — du hast alle! Komm zurück zu mir. 🐾',
     thanks: 'Danke, Fynnox! Du bist ein echter Held! 🎉',
   },
+}
+
+// Kristalle insgesamt: frei liegende + die in der Truhe. So bleibt die Anzeige „x / y"
+// ehrlich, auch wenn ein Teil der Kristalle erst aus der Truhe kommt.
+export function totalGemCount(level: LevelDef): number {
+  return (level.gems?.length ?? 0) + (level.chest?.gems ?? 0)
 }
 
 // Sternebewertung: 3 = alle Münzen, 2 = >= 60 %, 1 = Ziel erreicht.
