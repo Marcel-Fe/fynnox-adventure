@@ -1,4 +1,31 @@
-# NPC-Figuren-Pipeline (eigene 3D-Charaktere)
+# NPC-Figuren-Pipeline
+
+## Weg A — Artwork-Billboard (KOSTENLOS, empfohlen)
+
+Kein 3D-Tool nötig. Aus dem ChatGPT-Turnaround wird die Vorderansicht freigestellt und
+als Billboard in die 3D-Welt gestellt (dreht sich leicht zum Spieler, wippt, wirft Schatten).
+
+1. **Turnaround in ChatGPT erzeugen** (Prompts: `.planning/npc-prompts.md`) —
+   wichtig: **einfarbiger, neutraler Hintergrund**, keine Schlagschatten.
+2. **Freistellen + zuschneiden**: Der Hintergrund wird per Farb-Distanz zur Ecken-Farbe
+   entfernt (weicher Rand), danach auf die Figur getrimmt und als WebP gespeichert.
+   Skript-Vorlage: `scratchpad/cutnpc.mjs` (Chromium/Canvas, kein sharp nötig).
+   Ergebnis z. B. → `public/art/npc/bo_front.webp`
+3. **Im Level eintragen:**
+   ```ts
+   npcs: [
+     { x: 72, sprite: 'art/npc/bo_front.webp', height: 2.5, lines: ['Hallo!', '…'] },
+   ]
+   ```
+   `height` in Welt-Einheiten (Fynnox ist 2,6). Gerendert von `game/SpriteNpc.tsx`.
+
+**Warum das gut aussieht:** Das Spiel ist ein 2,5D-Seitenscroller — die Kamera schaut
+seitlich, Figuren stehen frontal zum Spieler. Ein hochwertiges Artwork-Billboard wirkt
+dabei plastischer als ein billiges 3D-Modell. Fynnox selbst lief anfangs genauso.
+
+---
+
+## Weg B — echtes 3D-Modell (kostet ggf. Geld)
 
 So bekommt eine NPC-Figur ihr **eigenes** 3D-Modell statt des getönten Fynnox-Platzhalters.
 Gleicher Weg wie beim Spieler-Fynnox — offline-tauglich, ohne externen Decoder.

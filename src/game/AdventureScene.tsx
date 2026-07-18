@@ -1,4 +1,5 @@
-import { useMemo, Suspense } from 'react'
+import { useMemo, useEffect, Suspense } from 'react'
+import { useThree } from '@react-three/fiber'
 import { Sky, Environment } from '@react-three/drei'
 import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing'
 import { Trees3D } from '../render/Trees3D'
@@ -15,6 +16,7 @@ import { Checkpoints, Goal } from './Flags'
 import { Gems, Stars, Springs } from './Pickups'
 import { Npc } from './Npc'
 import { Villager } from './Villager'
+import { SpriteNpc } from './SpriteNpc'
 import type { LevelDef } from './level'
 
 // Hochwertige 2,5D-3D-Bühne (Diorama/„New Super Mario Bros"-Anmutung): weiche Beleuchtung
@@ -37,6 +39,13 @@ function Ground({ minX, maxX }: { minX: number; maxX: number }) {
 }
 
 export function AdventureScene({ level }: { level: LevelDef }) {
+  // Dev-Hilfe: Szene/Kamera im Browser inspizierbar (wie window.__player / __game).
+  const { scene, camera } = useThree()
+  useEffect(() => {
+    ;(window as unknown as { __scene?: unknown; __cam?: unknown }).__scene = scene
+    ;(window as unknown as { __scene?: unknown; __cam?: unknown }).__cam = camera
+  }, [scene, camera])
+
   return (
     <>
       <Sky sunPosition={[80, 45, 60]} turbidity={3} rayleigh={0.9} mieCoefficient={0.004} mieDirectionalG={0.85} />
@@ -88,7 +97,7 @@ export function AdventureScene({ level }: { level: LevelDef }) {
         {level.springs && <Springs springs={level.springs} />}
         <Checkpoints positions={level.checkpoints} />
         <Goal x={level.goalX} />
-        {level.npcs?.map((n, i) => <Villager key={i} def={n} />)}
+        {level.npcs?.map((n, i) => (n.sprite ? <SpriteNpc key={i} def={n} /> : <Villager key={i} def={n} />))}
         {level.quest && (
           <Npc
             def={{ x: level.quest.npcX, model: level.quest.npcModel, tint: level.quest.npcTint }}

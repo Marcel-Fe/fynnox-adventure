@@ -35,7 +35,10 @@ export interface Spring {
 // Eine Figur in der Welt. Ohne `model` dient das getönte Fynnox-Modell als Platzhalter.
 export interface NpcDefData {
   x: number
-  model?: string
+  model?: string // 3D-Modell (GLB) unter public/models/
+  sprite?: string // ODER freigestelltes Artwork-Billboard unter public/ (kein 3D nötig)
+  height?: number // Welt-Höhe des Sprites (Fynnox ist 2,6)
+  z?: number // Tiefe; 0 = auf der Spielachse
   tint?: string
   scale?: number
   lines: string[] // Sprüche, die die Figur bei Annäherung zeigt (wechseln durch)
@@ -125,8 +128,9 @@ export const FOREST_LEVEL: LevelDef = {
       lines: ['Pass auf die Lücke auf!', 'Die Sprungfedern bringen dich ganz nach oben. ⭐', 'Hinter dem Hügel liegen Kristalle.'],
     },
     {
-      x: 72, tint: '#5fbf8a', scale: 1.05,
-      lines: ['Drei Sterne sind im Wald versteckt. ⭐', 'Ich habe einen davon oben glitzern sehen!', 'Ruh dich ruhig kurz aus.'],
+      // Bo, das Bärenjunge — echtes Artwork als freigestelltes Billboard
+      x: 72, sprite: 'art/npc/bo_front.webp', height: 2.5,
+      lines: ['Hallo Fynnox! Ich bin Bo. 🐻', 'Drei Sterne sind im Wald versteckt. ⭐', 'Ich hab einen oben glitzern sehen!'],
     },
     {
       x: 116, tint: '#d99a5c', scale: 0.9,
