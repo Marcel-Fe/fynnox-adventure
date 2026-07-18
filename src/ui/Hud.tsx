@@ -1,5 +1,6 @@
 import { useGameStore } from '../store/gameStore'
 import { getLevel } from '../game/levels'
+import { totalGemCount } from '../game/level'
 import { asset } from '../utils/asset'
 import { C, pill } from './theme'
 
@@ -11,7 +12,7 @@ export function Hud() {
   const levelId = useGameStore((s) => s.levelId)
   const level = getLevel(levelId)
   const total = level.coins.length
-  const gemTotal = level.gems?.length ?? 0
+  const gemTotal = totalGemCount(level)
   const starTotal = level.stars?.length ?? 0
 
   return (

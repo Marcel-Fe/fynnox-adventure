@@ -22,6 +22,8 @@ interface GameState {
   gems: number // wertvolle Kristalle im aktuellen Lauf
   stars: number // gefundene versteckte Sterne (max. 3)
   questDone: boolean // Aufgabe des Level-NPCs erfüllt (bei NPC abgegeben)
+  hasKey: boolean // Schlüssel zur Schatztruhe gefunden
+  chestOpen: boolean // Truhe bereits geöffnet
   result: RunResult | null
   save: SaveData
 
@@ -29,6 +31,8 @@ interface GameState {
   addCoin: () => void
   addGem: () => void
   addStar: () => void
+  takeKey: () => void
+  openChest: () => void
   completeQuest: () => void
   finish: (r: RunResult) => void
   toMenu: () => void
@@ -44,17 +48,23 @@ export const useGameStore = create<GameState>((set) => ({
   gems: 0,
   stars: 0,
   questDone: false,
+  hasKey: false,
+  chestOpen: false,
   result: null,
   save: loadSave(),
 
   start: (levelId) =>
-    set((s) => ({ screen: 'play', levelId, coins: 0, gems: 0, stars: 0, questDone: false, result: null, runId: s.runId + 1 })),
+    set((s) => ({ screen: 'play', levelId, coins: 0, gems: 0, stars: 0, questDone: false, hasKey: false, chestOpen: false, result: null, runId: s.runId + 1 })),
 
   addCoin: () => set((s) => ({ coins: s.coins + 1 })),
 
   addGem: () => set((s) => ({ gems: s.gems + 1 })),
 
   addStar: () => set((s) => ({ stars: s.stars + 1 })),
+
+  takeKey: () => set({ hasKey: true }),
+
+  openChest: () => set({ chestOpen: true }),
 
   completeQuest: () => set({ questDone: true }),
 

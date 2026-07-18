@@ -16,6 +16,7 @@ import { MovingPlatforms, buildMovers } from './MovingPlatforms'
 import { Coins } from './Coins'
 import { Checkpoints, Goal } from './Flags'
 import { Gems, Stars, Springs } from './Pickups'
+import { Chest, KeyItem } from './Chest'
 import { Npc } from './Npc'
 import { Villager } from './Villager'
 import { SpriteNpc } from './SpriteNpc'
@@ -107,6 +108,8 @@ export function AdventureScene({ level }: { level: LevelDef }) {
         {level.gems && <Gems gems={level.gems} />}
         {level.stars && <Stars stars={level.stars} />}
         {level.springs && <Springs springs={level.springs} />}
+        {level.key && <KeyItem def={level.key} />}
+        {level.chest && <Chest def={level.chest} />}
         <Checkpoints positions={level.checkpoints} />
         <Goal x={level.goalX} />
         {level.npcs?.map((n, i) => (n.sprite ? <SpriteNpc key={i} def={n} /> : <Villager key={i} def={n} />))}

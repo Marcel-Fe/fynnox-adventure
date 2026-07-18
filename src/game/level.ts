@@ -150,6 +150,11 @@ export const FOREST_LEVEL: LevelDef = {
     { x: 99.5, y: 6.0, w: 3, h: 0.5, axis: 'x', range: 3.5, speed: 0.8, phase: 1.2 },
     { x: 132.5, y: 5.0, w: 3, h: 0.5, axis: 'y', range: 2.2, speed: 0.9, phase: 0.6 },
   ],
+  // Schlüssel hängt über der beweglichen Plattform bei x 71,5 — man muss sie also
+  // hochfahren lassen und im höchsten Punkt abspringen. Belohnung ist die Truhe kurz
+  // vor der Ziel-Flagge.
+  key: { x: 71.5, y: 6.6 },
+  chest: { x: 135, y: 0, gems: 3 },
   checkpoints: [40, 74, 110],
   // Bewohner der Welt. Noch Platzhalter (umgefärbtes/skaliertes Fynnox-Modell), bis
   // eigene Figuren-GLBs vorliegen — Pipeline: docs/npc-pipeline.md.
