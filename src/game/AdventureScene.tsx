@@ -10,6 +10,8 @@ import { Life } from '../render/Life'
 import { Fx } from '../render/Fx'
 import { Water } from '../render/Water'
 import { makeGrassTexture } from '../render/paint'
+import { stageFor, type StageLook } from '../world/stage'
+import * as THREE from 'three'
 import { Player } from './Player'
 import { Platforms } from './Platforms'
 import { MovingPlatforms, buildMovers } from './MovingPlatforms'
@@ -29,17 +31,45 @@ const EMPTY_MOVERS: MoverDef[] = []
 // + Environment für runde Formen, plastische Plattformen, 3D-Tiefen-Wald mit Nebel,
 // Schatten für Erdung, sanftes Bloom. Spiel-Logik unverändert.
 
-function Ground({ minX, maxX }: { minX: number; maxX: number }) {
+// Streusel-Boden für die Zucker-Welt: helle Grundfläche mit bunten Sprenkeln. Rein
+// prozedural (keine Datei) und einmal erzeugt — im Gras-Look würde eine rosa Tönung auf
+// der grünen Gras-Textur nur schlammig aussehen.
+function makeSprinkleTexture(): THREE.CanvasTexture {
+  const c = document.createElement('canvas')
+  c.width = 256
+  c.height = 256
+  const ctx = c.getContext('2d')!
+  ctx.fillStyle = '#ffffff'
+  ctx.fillRect(0, 0, 256, 256)
+  let s = 4711
+  const r = () => ((s = (s * 1664525 + 1013904223) >>> 0), s / 0xffffffff)
+  const cols = ['#ffd6ea', '#ffe9a8', '#c9f0ff', '#ffc2d8', '#e0d0ff']
+  for (let i = 0; i < 220; i++) {
+    ctx.save()
+    ctx.translate(r() * 256, r() * 256)
+    ctx.rotate(r() * Math.PI)
+    ctx.fillStyle = cols[(r() * cols.length) | 0]
+    ctx.fillRect(-5, -1.6, 10, 3.2)
+    ctx.restore()
+  }
+  const t = new THREE.CanvasTexture(c)
+  t.colorSpace = THREE.SRGBColorSpace
+  t.wrapS = THREE.RepeatWrapping
+  t.wrapT = THREE.RepeatWrapping
+  return t
+}
+
+function Ground({ minX, maxX, look }: { minX: number; maxX: number; look: StageLook }) {
   const tex = useMemo(() => {
-    const t = makeGrassTexture()
+    const t = look.groundMap === 'grass' ? makeGrassTexture() : makeSprinkleTexture()
     t.repeat.set(60, 60)
     return t
-  }, [])
+  }, [look.groundMap])
   const w = maxX - minX + 240
   return (
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[(minX + maxX) / 2, 0, 0]} receiveShadow>
       <planeGeometry args={[w, 400]} />
-      <meshStandardMaterial map={tex} color="#5fb069" roughness={0.62} envMapIntensity={1.15} />
+      <meshStandardMaterial map={tex} color={look.ground} roughness={0.62} envMapIntensity={1.15} />
     </mesh>
   )
 }
@@ -58,22 +88,27 @@ export function AdventureScene({ level }: { level: LevelDef }) {
   const liveMovers = useMemo(() => buildMovers(movers), [movers])
   const allPlatforms = useMemo(() => [...level.platforms, ...liveMovers], [level.platforms, liveMovers])
 
+  // Welt-Stimmung: Himmel, Nebel, Licht, Boden- und Deko-Farben kommen aus EINER Tabelle
+  // (world/stage.ts). Der Wald-Eintrag dort enthält exakt die früher hier fest
+  // verdrahteten Werte — Welt 1 sieht dadurch unverändert aus.
+  const look = stageFor(level.world)
+
   return (
     <>
-      <Sky sunPosition={[80, 45, 60]} turbidity={3} rayleigh={0.9} mieCoefficient={0.004} mieDirectionalG={0.85} />
-      <fog attach="fog" args={['#bfe0e8', 42, 120]} />
+      <Sky sunPosition={look.sunPosition} turbidity={look.skyTurbidity} rayleigh={look.skyRayleigh} mieCoefficient={0.004} mieDirectionalG={0.85} />
+      <fog attach="fog" args={[look.fog, look.fogNear, look.fogFar]} />
 
       {/* Füllicht bewusst sparsam: zu viel Ambient/Hemisphere wäscht alle Farben aus.
           Der Glanz und die Tiefe kommen aus dem starken, warmen Hauptlicht + Environment. */}
       <Suspense fallback={null}>
-        <Environment preset="park" background={false} environmentIntensity={0.55} />
+        <Environment preset={look.envPreset} background={false} environmentIntensity={look.envIntensity} />
       </Suspense>
-      <ambientLight intensity={0.22} />
-      <hemisphereLight args={['#cdeaff', '#4d6b3f', 0.42]} />
+      <ambientLight intensity={look.ambient} />
+      <hemisphereLight args={[look.hemiSky, look.hemiGround, look.hemiIntensity]} />
       <directionalLight
-        color="#fff2d6"
+        color={look.sunColor}
         position={[35, 60, 30]}
-        intensity={2.1}
+        intensity={look.sunIntensity}
         castShadow
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
@@ -92,13 +127,14 @@ export function AdventureScene({ level }: { level: LevelDef }) {
         </Suspense>
       )}
 
-      <Ground minX={level.startX} maxX={level.goalX} />
+      <Ground minX={level.startX} maxX={level.goalX} look={look} />
       {/* Prozedurales Wasser nur ohne gemalten Hintergrund: das Artwork bringt Fluss,
-          See und Wasserfälle selbst mit — sonst schweben die Wasserfall-Flächen davor. */}
-      {!level.bg && <Water minX={level.startX} maxX={level.goalX} />}
-      <Houses minX={level.startX} maxX={level.goalX} />
-      <Trees3D minX={level.startX} maxX={level.goalX} />
-      <Scenery minX={level.startX} maxX={level.goalX} hills={!level.bg} />
+          See und Wasserfälle selbst mit — sonst schweben die Wasserfall-Flächen davor.
+          Und nur im Wald: ein blauer Fluss in der Zuckerwelt wäre fehl am Platz. */}
+      {!level.bg && level.world === 'forest' && <Water minX={level.startX} maxX={level.goalX} />}
+      {look.houses && <Houses minX={level.startX} maxX={level.goalX} />}
+      <Trees3D minX={level.startX} maxX={level.goalX} look={look} />
+      <Scenery minX={level.startX} maxX={level.goalX} hills={!level.bg} look={look} />
       <Life minX={level.startX} maxX={level.goalX} />
 
       <Platforms platforms={level.platforms} />

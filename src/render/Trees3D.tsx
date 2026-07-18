@@ -1,6 +1,7 @@
 import { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
+import { STAGE, type StageLook } from '../world/stage'
 
 // Plastische Cartoon-Bäume im 2,5D/„Diorama"-Look — jetzt mit mehr Varianz (Lücke 2):
 // drei Baum-Typen (Laubbaum / Nadelbaum / Busch), Stamm-Farb-Varianz, dichtere Kronen
@@ -24,9 +25,7 @@ interface TreeInst {
   phase: number
 }
 
-const TRUNKS = ['#7a5230', '#6b4423', '#835a34', '#5f3d22']
-
-function useTrees(minX: number, maxX: number): TreeInst[] {
+function useTrees(minX: number, maxX: number, trunks: string[]): TreeInst[] {
   return useMemo(() => {
     const r = rand(1337)
     const out: TreeInst[] = []
@@ -50,13 +49,13 @@ function useTrees(minX: number, maxX: number): TreeInst[] {
           scale: b.s[0] + r() * (b.s[1] - b.s[0]),
           hue: r(),
           type,
-          trunk: TRUNKS[(r() * TRUNKS.length) | 0],
+          trunk: trunks[(r() * trunks.length) | 0],
           phase: r() * Math.PI * 2,
         })
       }
     }
     return out
-  }, [minX, maxX])
+  }, [minX, maxX, trunks])
 }
 
 // Dichte, runde Laubkrone aus überlappenden Kugeln (mehr Blätter = plastischer).
@@ -100,9 +99,11 @@ function ConiferCrown({ green }: { green: THREE.Color }) {
   )
 }
 
-function Tree({ inst, crownRef }: { inst: TreeInst; crownRef: (g: THREE.Group | null) => void }) {
-  // Satte, tiefe Grüntöne — der Glanz kommt über niedrige Rauheit, NICHT über Aufhellen.
-  const green = new THREE.Color().setHSL(0.31 + inst.hue * 0.05, 0.68, 0.27 + inst.hue * 0.05)
+function Tree({ inst, crownRef, look }: { inst: TreeInst; crownRef: (g: THREE.Group | null) => void; look: StageLook }) {
+  // Kronenfarbe kommt aus dem Welt-Look. Im Wald: satte, tiefe Grüntöne — der Glanz
+  // entsteht über niedrige Rauheit, NICHT über Aufhellen.
+  const c = look.crown
+  const green = new THREE.Color().setHSL(c.hue + inst.hue * c.hueVar, c.sat, c.light + inst.hue * 0.05)
   const greenLight = green.clone().offsetHSL(0, -0.04, 0.07)
 
   return (
@@ -136,8 +137,8 @@ function Tree({ inst, crownRef }: { inst: TreeInst; crownRef: (g: THREE.Group | 
   )
 }
 
-export function Trees3D({ minX, maxX }: { minX: number; maxX: number }) {
-  const trees = useTrees(minX, maxX)
+export function Trees3D({ minX, maxX, look = STAGE.forest }: { minX: number; maxX: number; look?: StageLook }) {
+  const trees = useTrees(minX, maxX, look.trunks)
   const crowns = useRef<(THREE.Group | null)[]>([])
   const t = useRef(0)
 
@@ -161,7 +162,7 @@ export function Trees3D({ minX, maxX }: { minX: number; maxX: number }) {
   return (
     <>
       {trees.map((tr, i) => (
-        <Tree key={i} inst={tr} crownRef={(g) => { crowns.current[i] = g }} />
+        <Tree key={i} inst={tr} crownRef={(g) => { crowns.current[i] = g }} look={look} />
       ))}
     </>
   )

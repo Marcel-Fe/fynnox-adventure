@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber'
 import { Instances, Instance } from '@react-three/drei'
 import * as THREE from 'three'
 import { player } from '../game/playerState'
+import { STAGE, type StageLook } from '../world/stage'
 
 // Landschafts-Anreicherung für den modernen Cartoon-Look: entfernte Hügel/Berge (Tiefe
 // + Dunst), plus Boden-Deko (Blumen, Felsen, Büschel, Steine) rund um das Spielfeld.
@@ -36,7 +37,7 @@ function makeFlowerTexture(): THREE.CanvasTexture {
 }
 
 // Große, weiche Hügel weit hinten. Fern genug, dass der Nebel sie zart einfärbt → Tiefe.
-function DistantHills({ minX, maxX }: { minX: number; maxX: number }) {
+function DistantHills({ minX, maxX, near, far }: { minX: number; maxX: number; near: string; far: string }) {
   const hills = useMemo(() => {
     const r = rand(909)
     const out: { pos: [number, number, number]; scale: [number, number, number]; color: string }[] = []
@@ -45,7 +46,7 @@ function DistantHills({ minX, maxX }: { minX: number; maxX: number }) {
       out.push({
         pos: [x + (r() - 0.5) * 18, -6 + r() * 3, -70 - r() * 8],
         scale: [30 + r() * 16, 16 + r() * 10, 24],
-        color: '#5f9e57',
+        color: near,
       })
     }
     // hintere Bergkette (bläulich, höher)
@@ -53,11 +54,11 @@ function DistantHills({ minX, maxX }: { minX: number; maxX: number }) {
       out.push({
         pos: [x + (r() - 0.5) * 24, -4 + r() * 4, -95 - r() * 12],
         scale: [46 + r() * 24, 30 + r() * 16, 30],
-        color: '#7fa6bf',
+        color: far,
       })
     }
     return out
-  }, [minX, maxX])
+  }, [minX, maxX, near, far])
 
   return (
     <>
@@ -71,12 +72,12 @@ function DistantHills({ minX, maxX }: { minX: number; maxX: number }) {
   )
 }
 
-const FLOWER_COLORS = ['#ff5a7a', '#ffd23f', '#ffffff', '#ff8fc4', '#7ac8ff']
-
 // `hills`: prozedurale Hügel/Berge. Liegt ein gemalter Hintergrund vor, werden sie
 // abgeschaltet — sonst würden sie das Artwork verdecken und dagegen arbeiten.
-export function Scenery({ minX, maxX, hills = true }: { minX: number; maxX: number; hills?: boolean }) {
+// `look`: Farbpalette der Welt (Standard = Wald, damit Welt 1 unverändert bleibt).
+export function Scenery({ minX, maxX, hills = true, look = STAGE.forest }: { minX: number; maxX: number; hills?: boolean; look?: StageLook }) {
   const flowerTex = useMemo(() => makeFlowerTexture(), [])
+  const flowerColors = look.flowers
   const data = useMemo(() => {
     const r = rand(4242)
     const flowers: { p: [number, number, number]; c: string; s: number }[] = []
@@ -89,14 +90,14 @@ export function Scenery({ minX, maxX, hills = true }: { minX: number; maxX: numb
       for (const z of zBands) {
         const roll = r()
         const px = x + (r() - 0.5) * 1.0
-        if (roll < 0.5) flowers.push({ p: [px, 0.32, z], c: FLOWER_COLORS[(r() * FLOWER_COLORS.length) | 0], s: 0.34 + r() * 0.18 })
+        if (roll < 0.5) flowers.push({ p: [px, 0.32, z], c: flowerColors[(r() * flowerColors.length) | 0], s: 0.34 + r() * 0.18 })
         else if (roll < 0.72) tufts.push({ p: [px, 0.16, z], s: 0.28 + r() * 0.2 })
         else if (roll < 0.86) rocks.push({ p: [px, 0.12, z], s: 0.2 + r() * 0.35, rot: r() * Math.PI })
         else if (roll < 0.95) bushes.push({ p: [px, 0.28, z], s: 0.4 + r() * 0.35 })
       }
     }
     return { flowers, rocks, tufts, bushes }
-  }, [minX, maxX])
+  }, [minX, maxX, flowerColors])
 
   // „Bewegte Welt": Graswelle + Blumen, die auf Fynnox reagieren (Referenz-Sheet, Abschnitt 3).
   const flowerRefs = useRef<(THREE.Object3D | null)[]>([])
@@ -129,7 +130,7 @@ export function Scenery({ minX, maxX, hills = true }: { minX: number; maxX: numb
 
   return (
     <>
-      {hills && <DistantHills minX={minX} maxX={maxX} />}
+      {hills && <DistantHills minX={minX} maxX={maxX} near={look.hillNear} far={look.hillFar} />}
 
       {/* Blumen: farbige 5-Blütenblatt-Blüte (zur Kamera gerichtet) */}
       <Instances limit={data.flowers.length}>
@@ -143,7 +144,7 @@ export function Scenery({ minX, maxX, hills = true }: { minX: number; maxX: numb
       {/* Grasbüschel (kleine grüne Kegel) */}
       <Instances limit={data.tufts.length}>
         <coneGeometry args={[0.5, 1, 6]} />
-        <meshStandardMaterial color="#3f9a52" roughness={0.55} envMapIntensity={0.75} />
+        <meshStandardMaterial color={look.tuft} roughness={0.55} envMapIntensity={0.75} />
         {data.tufts.map((t, i) => (
           <Instance key={i} ref={(el: THREE.Object3D | null) => { tuftRefs.current[i] = el }} position={t.p} scale={[t.s, t.s * 1.6, t.s]} />
         ))}
@@ -152,7 +153,7 @@ export function Scenery({ minX, maxX, hills = true }: { minX: number; maxX: numb
       {/* Steine */}
       <Instances limit={data.rocks.length} castShadow receiveShadow>
         <dodecahedronGeometry args={[1, 0]} />
-        <meshStandardMaterial color="#9a9488" roughness={1} flatShading />
+        <meshStandardMaterial color={look.rock} roughness={1} flatShading />
         {data.rocks.map((rk, i) => (
           <Instance key={i} position={rk.p} scale={[rk.s, rk.s * 0.7, rk.s]} rotation={[0, rk.rot, 0]} />
         ))}
@@ -161,7 +162,7 @@ export function Scenery({ minX, maxX, hills = true }: { minX: number; maxX: numb
       {/* Büsche (kleine runde Laubkugeln) */}
       <Instances limit={data.bushes.length} castShadow>
         <sphereGeometry args={[1, 12, 10]} />
-        <meshStandardMaterial color="#3d9c52" roughness={0.5} envMapIntensity={0.75} />
+        <meshStandardMaterial color={look.bush} roughness={0.5} envMapIntensity={0.75} />
         {data.bushes.map((bs, i) => (
           <Instance key={i} position={bs.p} scale={[bs.s * 1.3, bs.s, bs.s]} />
         ))}
