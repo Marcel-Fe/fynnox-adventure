@@ -3,6 +3,7 @@ import { useGameStore } from '../store/gameStore'
 import { asset } from '../utils/asset'
 import { C } from './theme'
 import { LevelSelect } from './LevelSelect'
+import { AchievementsPanel, CharacterPanel, SettingsPanel } from './MenuPanel'
 import { isUnlocked, LEVEL_ORDER, WORLD_GROUPS } from '../game/levels'
 import { isMuted, toggleMute, subscribeMusic } from '../audio/music'
 
@@ -26,14 +27,16 @@ const WORLDS: WorldTile[] = [
   { key: 'crystal', name: 'Kristallhöhlen', subtitle: 'Schillernde Kristalle, dunkle Seen', img: 'art/previews/w_crystal.webp' },
 ]
 
-// Rechte Navigations-Leiste. Nur „Spielen" ist echt; die kommenden Bereiche sind klar
-// als „Bald" markiert (keine Fake-Buttons — CLAUDE.md §4).
-const NAV = [
-  { icon: '🧭', label: 'Welten', soon: true },
-  { icon: '🦊', label: 'Charakter', soon: true },
+type PanelKind = 'worlds' | 'character' | 'achievements' | 'settings'
+
+// Rechte Navigations-Leiste. Was noch nicht existiert, bleibt ehrlich als „Bald"
+// markiert — keine Fake-Buttons (CLAUDE.md §4).
+const NAV: { icon: string; label: string; panel?: PanelKind; soon?: boolean }[] = [
+  { icon: '🧭', label: 'Welten', panel: 'worlds' },
+  { icon: '🦊', label: 'Charakter', panel: 'character' },
   { icon: '📖', label: 'Sammelbuch', soon: true },
-  { icon: '🏆', label: 'Erfolge', soon: true },
-  { icon: '⚙️', label: 'Einstellungen', soon: true },
+  { icon: '🏆', label: 'Erfolge', panel: 'achievements' },
+  { icon: '⚙️', label: 'Einstellungen', panel: 'settings' },
 ]
 
 function HeaderMute() {
@@ -55,6 +58,7 @@ export function MainMenu() {
   const beginLevel = useGameStore((s) => s.beginLevel)
   const save = useGameStore((s) => s.save)
   const [openWorld, setOpenWorld] = useState<string | null>(null)
+  const [panel, setPanel] = useState<PanelKind | null>(null)
   const totalStars = Object.values(save.bestStars).reduce((a, b) => a + b, 0)
 
   // Fortschritt je Welt: Anteil der erreichten Sterne an allen möglichen.
@@ -144,8 +148,12 @@ export function MainMenu() {
             <button
               key={n.label}
               className="fa-glass"
-              disabled
-              style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '13px 18px', borderRadius: 16, color: '#fff', fontSize: 17, fontWeight: 700, cursor: 'default', opacity: 0.82, textAlign: 'left' }}
+              disabled={!n.panel}
+              onClick={() => {
+                if (n.panel === 'worlds') setOpenWorld('forest')
+                else if (n.panel) setPanel(n.panel)
+              }}
+              style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '13px 18px', borderRadius: 16, color: '#fff', fontSize: 17, fontWeight: 700, cursor: n.panel ? 'pointer' : 'default', opacity: n.panel ? 1 : 0.7, textAlign: 'left' }}
             >
               <span style={{ fontSize: 19, width: 24, textAlign: 'center' }}>{n.icon}</span>
               <span style={{ flex: 1 }}>{n.label}</span>
@@ -223,6 +231,9 @@ export function MainMenu() {
       </footer>
 
       {openWorld && <LevelSelect worldKey={openWorld} onClose={() => setOpenWorld(null)} />}
+      {panel === 'achievements' && <AchievementsPanel onClose={() => setPanel(null)} />}
+      {panel === 'character' && <CharacterPanel onClose={() => setPanel(null)} />}
+      {panel === 'settings' && <SettingsPanel onClose={() => setPanel(null)} />}
     </div>
   )
 }

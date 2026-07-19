@@ -28,6 +28,10 @@ export function loadSave(): SaveData {
   }
 }
 
+export function emptySave(): SaveData {
+  return { totalCoins: 0, bestStars: {}, done: {}, seenStory: {} }
+}
+
 export function writeSave(data: SaveData): void {
   try {
     localStorage.setItem(KEY, JSON.stringify(data))

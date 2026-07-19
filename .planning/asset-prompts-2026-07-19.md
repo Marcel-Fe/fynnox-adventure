@@ -52,24 +52,53 @@ Hochformat.
 ### A2 — Nadelbaum / Tanne
 
 ```
-[A1 kopieren, aber statt „Ein einzelner großer Laubbaum" schreiben:]
+Ein einzelner hoher Nadelbaum (Tanne), gemalte 2D-Spielgrafik für ein
+familienfreundliches Cartoon-Adventure. Schlank und spitz zulaufend, mit gestaffelten
+Zweig-Etagen und dichten dunkelgrünen Nadeln, kräftiger brauner Stamm mit gemalter
+Rindenstruktur und sichtbaren Wurzelansätzen. STRIKT SEITENANSICHT auf Augenhöhe,
+orthografisch, KEINE Vogelperspektive, KEINE isometrische Ansicht.
 
-Ein einzelner hoher Nadelbaum (Tanne), schlank und spitz zulaufend, mit gestaffelten
-Zweig-Etagen und dichten dunkelgrünen Nadeln, kräftiger brauner Stamm.
+Stil: hochwertig handgemalter Cartoon-Look, satte Grüntöne mit hellen Nadelspitzen,
+weiche plastische Volumen-Schattierung, warmes Sonnenlicht von oben links.
+Freundlich und einladend, nicht düster, nicht realistisch, nicht fotorealistisch.
 
-[Rest des Prompts A1 unverändert übernehmen.]
+Der Baum füllt das Bild vollständig aus und ist komplett zu sehen (Wurzeln unten,
+Spitze oben, nichts angeschnitten). Er steht frei, KEIN Boden, KEIN Gras, KEIN
+Schatten auf dem Boden, KEINE Landschaft.
+
+Hintergrund: einfarbig reines Magenta #FF00FF, absolut gleichmäßig, ohne Verlauf,
+ohne Muster, ohne Textur.
+
+Kein Text, keine Beschriftung, kein Rahmen, kein Wasserzeichen, nur dieses eine
+Objekt. Hochformat.
 ```
 
 ### A3 — Schlanke Birke
 
 ```
-[A1 kopieren, aber:]
+Eine einzelne schlanke Birke, gemalte 2D-Spielgrafik für ein familienfreundliches
+Cartoon-Adventure. Heller, weiß-schwarz gemusterter Stamm mit typischer Birkenrinde,
+locker herabhängende hellgrüne Blattzweige, luftige Krone. STRIKT SEITENANSICHT auf
+Augenhöhe, orthografisch, KEINE Vogelperspektive, KEINE isometrische Ansicht.
 
-Eine einzelne schlanke Birke mit hellem, weiß-schwarz gemustertem Stamm und locker
-herabhängenden, hellgrünen Blattzweigen.
+Stil: hochwertig handgemalter Cartoon-Look, frische helle Grüntöne, weiche plastische
+Volumen-Schattierung, sichtbare einzelne Blattbüschel, warmes Sonnenlicht von oben
+links. Freundlich und einladend, nicht düster, nicht realistisch.
 
-[Rest von A1 unverändert.]
+Der Baum füllt das Bild vollständig aus und ist komplett zu sehen (Wurzeln unten,
+Kronenspitze oben, nichts angeschnitten). Er steht frei, KEIN Boden, KEIN Gras,
+KEIN Schatten auf dem Boden, KEINE Landschaft.
+
+Hintergrund: einfarbig reines Magenta #FF00FF, absolut gleichmäßig, ohne Verlauf,
+ohne Muster, ohne Textur.
+
+Kein Text, keine Beschriftung, kein Rahmen, kein Wasserzeichen, nur dieses eine
+Objekt. Hochformat.
 ```
+
+> **Tipp für gleichbleibenden Stil:** Diese Bäume möglichst im GLEICHEN ChatGPT-Chat
+> erzeugen wie den ersten Laubbaum. Dann übernimmt das Modell die Mal-Handschrift und
+> die Bäume wirken im Spiel wie aus einer Hand.
 
 ### A4 — Busch / Strauch
 
@@ -162,9 +191,50 @@ Hintergrund: einfarbig reines Magenta #FF00FF, absolut gleichmäßig, ohne Verla
 Kein Text, keine Beschriftung, kein Rahmen, nur dieses eine Gebäude. Querformat.
 ```
 
-> Für Haus 2 und 3: denselben Prompt nehmen und das Dach variieren
-> („rotes Ziegeldach" / „grünes bemoostes Dach") sowie „mit kleinem Anbau und
-> Außentreppe" bzw. „mit Windrad auf dem Dach" ergänzen.
+### C2 — Zweites Haus (rotes Ziegeldach, mit Anbau)
+
+```
+Ein einzelnes gemütliches Fachwerk-Waldhaus mit rotem Ziegeldach und einem kleinen
+seitlichen Anbau mit Außentreppe, gemalte 2D-Spielgrafik für ein familienfreundliches
+Cartoon-Adventure. STRIKT SEITENANSICHT auf Augenhöhe, orthografisch, das Haus zeigt
+seine BREITE Längsseite zum Betrachter, KEINE Eckansicht, KEINE Vogelperspektive,
+KEINE isometrische Ansicht.
+
+Stil: hochwertig handgemalter Cartoon-Look, warme Holztöne, Fachwerkbalken, warm
+leuchtende Fenster, Steinsockel, Schornstein mit Rauch, Blumenkästen. Einladend und
+märchenhaft, leicht schief und handgezimmert wirkend, nicht steril, nicht realistisch.
+
+Das Haus füllt das Bild vollständig aus und ist komplett zu sehen, nichts
+angeschnitten. Es steht frei, KEIN Boden, KEIN Gras, KEIN Weg, KEIN Schatten auf dem
+Boden, KEINE Landschaft, KEINE anderen Häuser.
+
+Hintergrund: einfarbig reines Magenta #FF00FF, absolut gleichmäßig, ohne Verlauf.
+
+Kein Text, keine Beschriftung, kein Rahmen, nur dieses eine Gebäude. Querformat.
+```
+
+### C3 — Drittes Haus (bemoostes Dach, Turmzimmer)
+
+```
+Ein einzelnes gemütliches Fachwerk-Waldhaus mit grünem, bemoostem Dach und einem
+kleinen runden Turmzimmer an der Seite, gemalte 2D-Spielgrafik für ein
+familienfreundliches Cartoon-Adventure. STRIKT SEITENANSICHT auf Augenhöhe,
+orthografisch, das Haus zeigt seine BREITE Längsseite zum Betrachter, KEINE
+Eckansicht, KEINE Vogelperspektive, KEINE isometrische Ansicht.
+
+Stil: hochwertig handgemalter Cartoon-Look, warme Holztöne, Fachwerkbalken, warm
+leuchtende Fenster, Steinsockel, Schornstein mit Rauch, Efeu an der Wand. Einladend
+und märchenhaft, leicht schief und handgezimmert wirkend, nicht steril, nicht
+realistisch.
+
+Das Haus füllt das Bild vollständig aus und ist komplett zu sehen, nichts
+angeschnitten. Es steht frei, KEIN Boden, KEIN Gras, KEIN Weg, KEIN Schatten auf dem
+Boden, KEINE Landschaft, KEINE anderen Häuser.
+
+Hintergrund: einfarbig reines Magenta #FF00FF, absolut gleichmäßig, ohne Verlauf.
+
+Kein Text, keine Beschriftung, kein Rahmen, nur dieses eine Gebäude. Querformat.
+```
 
 ---
 
@@ -216,6 +286,41 @@ Kein Text, keine Beschriftung, kein Rahmen, kein Logo. Hochformat.
 ```
 
 ---
+
+## PAKET F — Küstenbucht: Parallax-Hintergrund (Welt 2)
+
+Das ist ein **anderer Bildtyp** als alles bisher: ein breites Panorama, das im Spiel weit
+hinten steht. Kein Magenta — das Bild ist vollflächig.
+
+Wichtig ist der **Horizont auf halber Höhe** und ein freier unterer Bildrand: dort läuft
+Fynnox, und dort liegt der 3D-Boden des Spiels. Kommt der Horizont zu hoch, passt die
+gemalte Landschaft nicht zum Boden.
+
+```
+Ein breites Panorama einer sonnigen Küstenbucht als Hintergrund für ein 2D-Jump-and-Run,
+STRIKT SEITENANSICHT auf Augenhöhe, orthografisch, KEINE Vogelperspektive, KEINE
+isometrische Ansicht.
+
+Bildaufbau: türkisblaues, kristallklares Meer mit sanften Wellen, eine geschwungene
+Bucht mit hellem Sandstrand, hölzerne Stege und kleine Fischerboote, Palmen und
+tropische Büsche, felsige Klippen, in der Ferne ein Leuchtturm auf einer Insel und
+weiche blaue Hügel im Dunst. Oben ein heller Himmel mit großen weißen Schönwetterwolken.
+
+Der Horizont liegt auf halber Bildhöhe. Das UNTERE Bilddrittel bleibt ruhig und
+einfach — nur Wasser, Sand und flache Uferlinie, KEINE großen Objekte, KEINE Figuren,
+KEINE Wege im Vordergrund.
+
+Stil: hochwertig handgemalter Cartoon-Look, satte warme Farben, weiche plastische
+Schattierung, freundlich und einladend, wie ein modernes Familien-Abenteuerspiel.
+Nicht fotorealistisch, nicht düster.
+
+Sehr breites Panorama-Format (etwa 21:9). Kein Text, keine Beschriftung, kein Rahmen,
+keine Spielfiguren, keine Benutzeroberfläche.
+```
+
+Dazu passend wären später noch Deko-Objekte für die Bucht (Palme, Felsen mit Muscheln,
+Steg-Stück, Fass) — nach demselben Muster wie Paket A/B, auf Magenta. Aber zuerst der
+Hintergrund: der bestimmt die Stimmung der ganzen Welt.
 
 ## Wenn ChatGPT nicht mitspielt
 

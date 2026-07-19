@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { loadSave, writeSave, type SaveData } from '../save/save'
+import { emptySave, loadSave, writeSave, type SaveData } from '../save/save'
 import { storyFor, type StoryKind } from '../data/story'
 import { nextLevelId } from '../game/levels'
 
@@ -45,6 +45,7 @@ interface GameState {
   completeQuest: () => void
   finish: (r: RunResult) => void
   toMenu: () => void
+  resetSave: () => void
 }
 
 // Nur seltene Zustände (HUD/Screens). Spielerposition läuft über playerState
@@ -141,6 +142,13 @@ export const useGameStore = create<GameState>((set, get) => ({
     }),
 
   toMenu: () => set({ screen: 'menu', result: null, pendingStory: null }),
+
+  // Fortschritt löschen. Destruktiv — die Oberfläche fragt vorher nach.
+  resetSave: () => {
+    const save = emptySave()
+    writeSave(save)
+    set({ save, screen: 'menu', result: null, pendingStory: null })
+  },
 }))
 
 // Dev-Hilfe: Store im Browser inspizierbar (für automatisierte Tests).
