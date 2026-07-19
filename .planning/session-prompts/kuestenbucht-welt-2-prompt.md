@@ -1,4 +1,11 @@
 # Küstenbucht (Welt 2) — Session-Prompt für Claude Code
+
+> ⚠️ **ERLEDIGT am 2026-07-19 — nicht mehr verwenden.**
+> Der Nutzer lieferte das Panorama direkt nach Erstellung dieses Prompts, alle fünf Lücken
+> wurden noch in derselben Session gebaut (Commit `aaeddb6`). Die Welt existiert mit drei
+> Leveln. Nachfolger: `kueste-politur-prompt.md`.
+> Datei bleibt als Nachweis der damaligen Analyse erhalten.
+
 ## Den Prompt unten kopieren und als erste Nachricht in eine neue Claude-Code-Session einfügen
 ---
 
