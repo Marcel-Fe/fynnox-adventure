@@ -5,6 +5,7 @@ import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing'
 import { Trees3D } from '../render/Trees3D'
 import { TreeBillboards } from '../render/TreeBillboards'
 import { GroundDeco } from '../render/GroundDeco'
+import { HouseBillboards } from '../render/HouseBillboards'
 import { Scenery } from '../render/Scenery'
 import { Houses } from '../render/Houses'
 import { Backdrop } from '../render/Parallax3D'
@@ -138,6 +139,11 @@ export function AdventureScene({ level }: { level: LevelDef }) {
           Und nur im Wald: ein blauer Fluss in der Zuckerwelt wäre fehl am Platz. */}
       {!level.bg && level.world === 'forest' && <Water minX={level.startX} maxX={level.goalX} />}
       {look.houses && <Houses minX={level.startX} maxX={level.goalX} />}
+      {look.houseArt.length > 0 && (
+        <Suspense fallback={null}>
+          <HouseBillboards minX={level.startX} maxX={level.goalX} look={look} />
+        </Suspense>
+      )}
       {/* Gemalte Bäume, sobald für diese Welt Artwork vorliegt — sonst die alte
           Geometrie-Variante als Übergangslösung. */}
       {look.treeArt.length > 0 ? (
@@ -155,7 +161,9 @@ export function AdventureScene({ level }: { level: LevelDef }) {
       )}
       <Life minX={level.startX} maxX={level.goalX} />
 
-      <Platforms platforms={level.platforms} />
+      <Suspense fallback={null}>
+        <Platforms platforms={level.platforms} />
+      </Suspense>
       <MovingPlatforms defs={movers} live={liveMovers} />
       <Suspense fallback={null}>
         <Coins coins={level.coins} />

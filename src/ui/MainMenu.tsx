@@ -74,7 +74,9 @@ export function MainMenu() {
   return (
     <div className="fa-menu" style={{ position: 'fixed', inset: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', color: '#fff' }}>
       {/* Cover + Verlauf */}
-      <img src={asset('art/previews/wald.png')} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+      {/* Das gemalte Wald-Panorama aus dem Spiel — das alte Preview stammte aus dem
+          Kart-Projekt und zeigte eine Rennstrecke, was zu einem Jump-&-Run nicht passt. */}
+      <img src={asset('art/bg/wald/far.webp')} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
       <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(8,16,32,0.55) 0%, rgba(8,16,32,0.2) 32%, rgba(8,16,32,0.35) 62%, rgba(6,12,24,0.85) 100%)' }} />
 
       {/* ---- Kopfzeile ---- */}
@@ -104,12 +106,17 @@ export function MainMenu() {
       {/* ---- Hauptbereich ---- */}
       <main style={{ position: 'relative', zIndex: 2, flex: 1, minHeight: 0 }}>
         {/* Hero links */}
-        <section style={{ position: 'absolute', left: 30, top: '6%', display: 'flex', alignItems: 'center', gap: 20, maxWidth: '52%' }}>
-          <div className="fa-float" style={{ position: 'relative', flex: '0 0 auto', width: 168, height: 168 }}>
-            <div className="fa-ring" style={{ position: 'absolute', inset: -10, borderRadius: '50%', border: '3px dashed rgba(255,180,90,0.6)' }} />
-            <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', overflow: 'hidden', border: '5px solid rgba(255,255,255,0.9)', boxShadow: '0 14px 40px rgba(0,0,0,0.5)', background: 'radial-gradient(circle at 50% 35%, #cdeeff, #6ea9d6)' }}>
-              <img src={asset('art/fynnox/portrait.png')} alt="Fynnox" style={{ width: '100%', height: '100%', objectFit: 'contain', transform: 'translateY(2%) scale(1.02)' }} />
-            </div>
+        <section style={{ position: 'absolute', left: 30, top: '2%', display: 'flex', alignItems: 'center', gap: 8, maxWidth: '56%' }}>
+          {/* Ganzkörper-Fynnox im korrekten Look statt des alten Vektor-Portraits im
+              Kreis-Avatar. Frei gestellt und ohne Rahmen — die Figur SOLL aus dem
+              Layout herausragen, das wirkt hochwertiger als ein Bildchen im Kreis. */}
+          <div className="fa-float" style={{ position: 'relative', flex: '0 0 auto', width: 230, height: 380, alignSelf: 'flex-end' }}>
+            <div className="fa-ring" style={{ position: 'absolute', left: '50%', bottom: 6, width: 170, height: 34, transform: 'translateX(-50%)', borderRadius: '50%', background: 'radial-gradient(ellipse at center, rgba(0,0,0,0.45), rgba(0,0,0,0))' }} />
+            <img
+              src={asset('art/fynnox/hero.webp')}
+              alt="Fynnox"
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain', filter: 'drop-shadow(0 12px 26px rgba(0,0,0,0.55))' }}
+            />
           </div>
           <div>
             <h1 style={{ margin: 0, fontWeight: 900, lineHeight: 0.92, textShadow: '0 4px 0 rgba(0,0,0,0.3)' }}>
