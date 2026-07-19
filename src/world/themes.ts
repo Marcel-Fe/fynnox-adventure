@@ -2,8 +2,10 @@
 // Jede der fünf Adventure-Welten teilt sich ein Thema mit dem Racer:
 // Wald, Zuckerwirbel, Vulkanpfad, Gletschergleiter, Neon-Nachtstadt.
 
-export type DecorKind = 'forest' | 'candy' | 'volcano' | 'city' | 'ice'
-export type GroundKind = 'grass' | 'candy' | 'rock' | 'city' | 'ice'
+// 'coast' ist die zweite ausgebaute Welt (Küstenbucht) und stammt aus dem Konzept-Artwork
+// des Nutzers vom 19.07.; die übrigen Einträge sind aus dem Kart-Projekt geerbt.
+export type DecorKind = 'forest' | 'coast' | 'candy' | 'volcano' | 'city' | 'ice'
+export type GroundKind = 'grass' | 'sand' | 'candy' | 'rock' | 'city' | 'ice'
 export type SkyKind = 'day' | 'sunset' | 'night'
 
 export interface WorldTheme {
@@ -25,6 +27,11 @@ export const THEMES: Record<DecorKind, WorldTheme> = {
     id: 'wald', name: 'Wald-Abenteuer',
     sky: 'day', fog: '#bcd6f0', ground: '#6fa04e', groundTex: 'grass',
     decor: 'forest', envPreset: 'park', ambient: 0.25, hemiSky: '#bfe3ff', hemiGround: '#3a7a48',
+  },
+  coast: {
+    id: 'kuestenbucht', name: 'Küstenbucht',
+    sky: 'day', fog: '#cfeaf7', ground: '#e8d29a', groundTex: 'sand',
+    decor: 'coast', envPreset: 'park', ambient: 0.3, hemiSky: '#bfeaff', hemiGround: '#d9bf8a',
   },
   candy: {
     id: 'zuckerwirbel', name: 'Zuckerwirbel',

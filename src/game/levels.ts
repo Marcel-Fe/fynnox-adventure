@@ -227,12 +227,220 @@ const CANDY_1: LevelDef = {
 }
 
 // ---------------------------------------------------------------------------
+// Welt 2 — Küstenbucht. Gemeinsame Basis für die drei Strand-Level.
+// Der Hintergrund ist Nutzer-Artwork; prozedurale Hügel und Wasser sind deshalb aus
+// (`bg` gesetzt → Scenery/Water schalten sich ab, siehe AdventureScene).
+// ---------------------------------------------------------------------------
+const COAST_BG = 'art/bg/kueste/far.webp'
+
+// Küste 2-1 — „Am Steg". Sanfter Einstieg in die neue Welt: breite Plattformen,
+// kurze Sprünge, viel zu sammeln.
+const KUESTE_1: LevelDef = {
+  id: 'kueste-1',
+  name: 'Küste 2-1',
+  world: 'coast',
+  startX: -5,
+  goalX: 112,
+  platforms: [
+    { x: 7, y: 1.7, w: 4.5, h: 0.6 },
+    { x: 15, y: 3.0, w: 4, h: 0.6 },
+    { x: 23, y: 4.3, w: 4, h: 0.6 },
+    { x: 32, y: 2.6, w: 4.5, h: 0.6 },
+    { x: 41, y: 4.0, w: 4, h: 0.6 },
+    { x: 52, y: 2.4, w: 4.5, h: 0.6 },
+    { x: 61, y: 3.8, w: 4, h: 0.6 },
+    { x: 70, y: 5.2, w: 3.5, h: 0.6 },
+    { x: 80, y: 3.2, w: 4.5, h: 0.6 },
+    { x: 90, y: 4.6, w: 4, h: 0.6 },
+    { x: 100, y: 2.8, w: 4.5, h: 0.6 },
+  ],
+  movers: [
+    { x: 47, y: 3.4, w: 3, h: 0.5, axis: 'y', range: 1.7, speed: 1.0 },
+    { x: 75, y: 4.4, w: 3, h: 0.5, axis: 'x', range: 2.8, speed: 0.9, phase: 1.3 },
+  ],
+  coins: [
+    { x: -2, y: 1.1 }, { x: 1, y: 1.1 }, { x: 4, y: 1.1 }, { x: 8.5, y: 3.0 },
+    { x: 12, y: 1.1 }, { x: 16.5, y: 4.3 }, { x: 20, y: 1.1 }, { x: 24.5, y: 5.6 },
+    { x: 28, y: 1.1 }, { x: 33.5, y: 3.9 }, { x: 37, y: 1.1 }, { x: 42.5, y: 5.3 },
+    { x: 46, y: 1.1 }, { x: 48.5, y: 5.4 }, { x: 53.5, y: 3.7 }, { x: 57, y: 1.1 },
+    { x: 62.5, y: 5.1 }, { x: 66, y: 1.1 }, { x: 71.5, y: 6.5 }, { x: 76.5, y: 5.6 },
+    { x: 78, y: 1.1 }, { x: 81.5, y: 4.5 }, { x: 86, y: 1.1 }, { x: 91.5, y: 5.9 },
+    { x: 96, y: 1.1 }, { x: 101.5, y: 4.1 }, { x: 106, y: 1.1 }, { x: 109, y: 1.1 },
+  ],
+  gems: [
+    { x: 24.5, y: 7.4 }, { x: 62.5, y: 7.2 }, { x: 91.5, y: 7.8 },
+  ],
+  stars: [
+    { x: 20, y: 8.8 }, { x: 57, y: 9.0 }, { x: 96, y: 8.8 },
+  ],
+  springs: [
+    { x: 20, y: 0.35 }, { x: 57, y: 0.35 }, { x: 96, y: 0.35 },
+  ],
+  checkpoints: [38, 76],
+  npcs: [
+    {
+      x: 30, tint: '#4fb0c8', scale: 0.86,
+      lines: ['Willkommen an der Küste, Fynnox! 🌊', 'Der Sand ist warm und das Wasser klar.', 'Am Leuchtturm soll etwas glitzern.'],
+    },
+    {
+      x: 88, sprite: 'art/npc/bo_front.webp', height: 2.5,
+      lines: ['Ich bin extra hergereist! 🐻', 'Die Muscheln hier klingen wie Glocken.', 'Weiter hinten liegen alte Stege.'],
+    },
+  ],
+  bg: COAST_BG,
+  goals: [
+    { kind: 'finish', label: 'Erreiche die Ziel-Flagge' },
+    { kind: 'coins', label: 'Sammle alle 28 Pfotenmünzen' },
+    { kind: 'talk', label: 'Sprich mit beiden Strandbewohnern' },
+  ],
+  quest: {
+    npcX: 1,
+    npcTint: '#7fd0e0',
+    ask: 'Die Flut hat Pfotenmünzen 🐾 über den Strand verteilt. Hilfst du?',
+    ready: 'Alle wieder da! Komm kurz zu mir. 🐾',
+    thanks: 'Danke, Fynnox! Jetzt ist die Bucht wieder aufgeräumt. 🌊',
+  },
+}
+
+// Küste 2-2 — „Die alten Stege". Schwerpunkt bewegliche Plattformen über dem Wasser.
+const KUESTE_2: LevelDef = {
+  id: 'kueste-2',
+  name: 'Küste 2-2',
+  world: 'coast',
+  startX: -4,
+  goalX: 104,
+  platforms: [
+    { x: 6, y: 1.9, w: 4, h: 0.6 },
+    { x: 14, y: 3.4, w: 3.5, h: 0.6 },
+    { x: 26, y: 3.8, w: 4, h: 0.6 },
+    { x: 38, y: 2.6, w: 4, h: 0.6 },
+    { x: 50, y: 4.4, w: 3.5, h: 0.6 },
+    { x: 62, y: 3.0, w: 4, h: 0.6 },
+    { x: 74, y: 5.0, w: 3.5, h: 0.6 },
+    { x: 86, y: 3.4, w: 4, h: 0.6 },
+    { x: 96, y: 4.8, w: 3.5, h: 0.6 },
+  ],
+  movers: [
+    { x: 20, y: 3.6, w: 3, h: 0.5, axis: 'x', range: 3.0, speed: 0.9 },
+    { x: 32, y: 3.2, w: 3, h: 0.5, axis: 'y', range: 1.8, speed: 1.15, phase: 0.5 },
+    { x: 44, y: 3.6, w: 3, h: 0.5, axis: 'x', range: 3.2, speed: 1.0, phase: 1.7 },
+    { x: 56, y: 4.0, w: 3, h: 0.5, axis: 'y', range: 2.1, speed: 0.9, phase: 1.0 },
+    { x: 68, y: 4.2, w: 3, h: 0.5, axis: 'x', range: 3.2, speed: 0.85, phase: 2.3 },
+    { x: 80, y: 4.4, w: 3, h: 0.5, axis: 'y', range: 2.2, speed: 1.1, phase: 0.4 },
+    { x: 92, y: 4.4, w: 3, h: 0.5, axis: 'x', range: 2.8, speed: 0.95, phase: 1.2 },
+  ],
+  coins: [
+    { x: -1, y: 1.1 }, { x: 2, y: 1.1 }, { x: 7.5, y: 3.2 }, { x: 10, y: 1.1 },
+    { x: 15.5, y: 4.5 }, { x: 18, y: 1.1 }, { x: 21.5, y: 4.7 }, { x: 27.5, y: 4.9 },
+    { x: 30, y: 1.1 }, { x: 33.5, y: 4.3 }, { x: 39.5, y: 3.7 }, { x: 42, y: 1.1 },
+    { x: 45.5, y: 4.7 }, { x: 51.5, y: 5.5 }, { x: 54, y: 1.1 }, { x: 57.5, y: 5.1 },
+    { x: 63.5, y: 4.1 }, { x: 66, y: 1.1 }, { x: 69.5, y: 5.3 }, { x: 75.5, y: 6.1 },
+    { x: 78, y: 1.1 }, { x: 81.5, y: 5.5 }, { x: 87.5, y: 4.5 }, { x: 90, y: 1.1 },
+    { x: 93.5, y: 5.5 }, { x: 97.5, y: 5.9 },
+  ],
+  gems: [
+    { x: 21.5, y: 7.4 }, { x: 57.5, y: 7.8 }, { x: 93.5, y: 7.6 },
+  ],
+  stars: [
+    { x: 24, y: 8.8 }, { x: 60, y: 9.0 }, { x: 88, y: 8.8 },
+  ],
+  springs: [
+    { x: 24, y: 0.35 }, { x: 60, y: 0.35 }, { x: 88, y: 0.35 },
+  ],
+  key: { x: 80, y: 8.9 },
+  chest: { x: 100, y: 0, gems: 3 },
+  checkpoints: [36, 72],
+  npcs: [
+    {
+      x: 24, tint: '#e0a86a', scale: 0.9,
+      lines: ['Die Stege schwanken bei Flut! 🪵', 'Warte den richtigen Moment ab.'],
+    },
+    {
+      x: 76, tint: '#8fb0e0', scale: 0.84,
+      lines: ['Der Schlüssel liegt hoch über dem Wasser. 🔑', 'Die Truhe steht am Ende der Bucht. 🧰'],
+    },
+  ],
+  bg: COAST_BG,
+  goals: [
+    { kind: 'finish', label: 'Erreiche die Ziel-Flagge' },
+    { kind: 'chest', label: 'Finde den Schlüssel und öffne die Truhe' },
+    { kind: 'stars', label: 'Finde alle 3 versteckten Sterne' },
+  ],
+}
+
+// Küste 2-3 — „Zum Leuchtturm". Höhenweg mit Kristallen und Abschluss der Welt.
+const KUESTE_3: LevelDef = {
+  id: 'kueste-3',
+  name: 'Küste 2-3',
+  world: 'coast',
+  startX: -4,
+  goalX: 100,
+  platforms: [
+    { x: 6, y: 2.1, w: 4, h: 0.6 },
+    { x: 14, y: 3.7, w: 3.5, h: 0.6 },
+    { x: 21, y: 5.3, w: 3, h: 0.6 },
+    { x: 29, y: 6.7, w: 3, h: 0.6 },
+    { x: 40, y: 4.2, w: 4, h: 0.6 },
+    { x: 52, y: 2.8, w: 4, h: 0.6 },
+    { x: 60, y: 4.4, w: 3.5, h: 0.6 },
+    { x: 72, y: 6.2, w: 3.5, h: 0.6 },
+    { x: 82, y: 4.6, w: 4, h: 0.6 },
+    { x: 92, y: 6.4, w: 3.5, h: 0.6 },
+  ],
+  movers: [
+    { x: 34, y: 5.8, w: 3, h: 0.5, axis: 'y', range: 2.5, speed: 1.0 },
+    { x: 46, y: 3.6, w: 3, h: 0.5, axis: 'x', range: 3.0, speed: 1.1, phase: 0.8 },
+    { x: 66, y: 5.4, w: 3, h: 0.5, axis: 'y', range: 2.6, speed: 0.85, phase: 1.4 },
+    { x: 77, y: 5.6, w: 3, h: 0.5, axis: 'x', range: 2.6, speed: 1.15, phase: 2.0 },
+  ],
+  coins: [
+    { x: -1, y: 1.1 }, { x: 2, y: 1.1 }, { x: 7.5, y: 3.2 }, { x: 10, y: 1.1 },
+    { x: 15.5, y: 4.8 }, { x: 18, y: 1.1 }, { x: 22.5, y: 6.4 }, { x: 30.5, y: 7.8 },
+    { x: 33, y: 1.1 }, { x: 35.5, y: 6.9 }, { x: 41.5, y: 5.3 }, { x: 44, y: 1.1 },
+    { x: 47.5, y: 4.7 }, { x: 53.5, y: 3.9 }, { x: 56, y: 1.1 }, { x: 61.5, y: 5.5 },
+    { x: 67.5, y: 6.5 }, { x: 70, y: 1.1 }, { x: 73.5, y: 7.3 }, { x: 78.5, y: 6.7 },
+    { x: 80, y: 1.1 }, { x: 83.5, y: 5.7 }, { x: 93.5, y: 7.5 }, { x: 97, y: 1.1 },
+  ],
+  gems: [
+    { x: 30.5, y: 8.4 }, { x: 48, y: 5.8 }, { x: 67.5, y: 8.8 }, { x: 93.5, y: 8.2 },
+  ],
+  stars: [
+    { x: 26, y: 9.0 }, { x: 56, y: 9.2 }, { x: 88, y: 9.0 },
+  ],
+  springs: [
+    { x: 26, y: 0.35 }, { x: 56, y: 0.35 }, { x: 88, y: 0.35 },
+  ],
+  key: { x: 66, y: 9.6 },
+  chest: { x: 96, y: 0, gems: 4 },
+  checkpoints: [38, 70],
+  npcs: [
+    {
+      x: 20, tint: '#c8d8e8', scale: 0.88,
+      lines: ['Von oben sieht man den ganzen Ozean. 🔭', 'Der Leuchtturm blinkt noch immer.'],
+    },
+    {
+      x: 64, sprite: 'art/npc/bo_front.webp', height: 2.5,
+      lines: ['Fast geschafft, Fynnox! 🐻', 'Der letzte Kristall muss hier irgendwo sein. 💎'],
+    },
+  ],
+  bg: COAST_BG,
+  goals: [
+    { kind: 'finish', label: 'Erreiche die Ziel-Flagge' },
+    { kind: 'gems', label: 'Sammle alle Kristalle (auch die in der Truhe)' },
+    { kind: 'stars', label: 'Finde alle 3 versteckten Sterne' },
+  ],
+}
+
+// ---------------------------------------------------------------------------
 // Register
 // ---------------------------------------------------------------------------
 export const LEVELS: Record<string, LevelDef> = {
   'wald-1': FOREST_LEVEL,
   'wald-2': WALD_2,
   'wald-3': WALD_3,
+  'kueste-1': KUESTE_1,
+  'kueste-2': KUESTE_2,
+  'kueste-3': KUESTE_3,
   'candy-1': CANDY_1,
 }
 
@@ -255,6 +463,7 @@ export interface WorldGroup {
 // vor. Das Level wird wieder eingehängt, sobald es eine passende Welt hat.
 export const WORLD_GROUPS: WorldGroup[] = [
   { key: 'forest', name: 'Sonnenwald', levels: ['wald-1', 'wald-2', 'wald-3'] },
+  { key: 'coast', name: 'Küstenbucht', levels: ['kueste-1', 'kueste-2', 'kueste-3'] },
 ]
 
 // Alle Level in Spielreihenfolge.

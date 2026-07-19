@@ -4,32 +4,15 @@ import { Instances, Instance, useTexture } from '@react-three/drei'
 import * as THREE from 'three'
 import { asset } from '../utils/asset'
 import { player } from '../game/playerState'
+import type { DecoItem } from '../world/stage'
 
 // Gemalte Boden-Deko (Nutzer-Artwork) statt Kegeln und Dodekaedern.
 // Gleiches Prinzip wie TreeBillboards: feststehende Flächen mit Normale +Z, weil die
 // Seitenkamera sich nie dreht. Ein Instances-Block je Objekttyp.
 
-interface DecoType {
-  name: string
-  aspect: number // Breite / Höhe des freigestellten Artworks
-  h: number // Welt-Höhe (Fynnox ist 2,6 hoch)
-  weight: number // relative Häufigkeit
-  sway: boolean // weiches Zeug wiegt sich im Wind und weicht Fynnox aus
-}
-
-// Höhen bewusst von Hand gesetzt (nicht aus der Blatt-Größe abgeleitet): auf dem Blatt
-// sind alle Objekte etwa gleich groß gemalt, im Spiel müssen Pilze aber deutlich kleiner
-// sein als ein Felsblock.
-const TYPES: DecoType[] = [
-  { name: 'grass', aspect: 1.0955, h: 1.0, weight: 0.3, sway: true },
-  { name: 'flowers', aspect: 0.6193, h: 0.85, weight: 0.16, sway: true },
-  { name: 'pebble', aspect: 1.4605, h: 0.42, weight: 0.13, sway: false },
-  { name: 'rock_mid', aspect: 1.3289, h: 0.95, weight: 0.1, sway: false },
-  { name: 'stones', aspect: 1.9009, h: 0.55, weight: 0.1, sway: false },
-  { name: 'mushrooms', aspect: 0.8883, h: 0.7, weight: 0.09, sway: true },
-  { name: 'rock_big', aspect: 1.1557, h: 1.7, weight: 0.06, sway: false },
-  { name: 'log', aspect: 1.8626, h: 1.0, weight: 0.06, sway: false },
-]
+// Welche Objekte eine Welt verwendet, steht in `world/stage.ts` (`StageLook.deco`) —
+// der Wald nutzt Gras/Blumen/Pilze, die Küste nur Felsen und Treibholz.
+type DecoType = DecoItem
 
 function rand(seed: number) {
   let s = seed >>> 0
@@ -53,21 +36,21 @@ const BANDS = [
   { z: -8.5, spread: 3.2, step: 3.0, scale: 0.92 },
 ]
 
-function usePlacement(minX: number, maxX: number): Placed[][] {
+function usePlacement(minX: number, maxX: number, types: DecoType[]): Placed[][] {
   return useMemo(() => {
     const r = rand(4242)
-    const total = TYPES.reduce((a, t) => a + t.weight, 0)
-    const out: Placed[][] = TYPES.map(() => [])
+    const total = types.reduce((a, t) => a + t.weight, 0)
+    const out: Placed[][] = types.map(() => [])
     for (const b of BANDS) {
       for (let x = minX - 12; x <= maxX + 12; x += b.step) {
         // gewichtete Typ-Wahl
         let roll = r() * total
         let ti = 0
-        while (ti < TYPES.length - 1 && roll > TYPES[ti].weight) {
-          roll -= TYPES[ti].weight
+        while (ti < types.length - 1 && roll > types[ti].weight) {
+          roll -= types[ti].weight
           ti++
         }
-        const t = TYPES[ti]
+        const t = types[ti]
         out[ti].push({
           x: x + (r() - 0.5) * b.step,
           z: b.z + (r() - 0.5) * b.spread,
@@ -79,7 +62,7 @@ function usePlacement(minX: number, maxX: number): Placed[][] {
       }
     }
     return out
-  }, [minX, maxX])
+  }, [minX, maxX, types])
 }
 
 function DecoType({ type, items }: { type: DecoType; items: Placed[] }) {
@@ -129,11 +112,11 @@ function DecoType({ type, items }: { type: DecoType; items: Placed[] }) {
   )
 }
 
-export function GroundDeco({ minX, maxX }: { minX: number; maxX: number }) {
-  const placed = usePlacement(minX, maxX)
+export function GroundDeco({ minX, maxX, types }: { minX: number; maxX: number; types: DecoType[] }) {
+  const placed = usePlacement(minX, maxX, types)
   return (
     <>
-      {TYPES.map((t, i) => (
+      {types.map((t, i) => (
         <DecoType key={t.name} type={t} items={placed[i] ?? []} />
       ))}
     </>

@@ -43,6 +43,33 @@ const INTRO: Record<string, StoryBeat> = {
     ],
     portrait: 'art/previews/w_forest.webp',
   },
+  'kueste-1': {
+    chapter: 'Kapitel 4',
+    title: 'Salz in der Luft',
+    text: [
+      'Der Wald endet, der Sand beginnt. Vor Fynnox liegt eine Bucht aus türkisem Wasser, hellem Strand und schaukelnden Booten.',
+      'Weit draußen blinkt ein Leuchtturm — und irgendetwas darin funkelt anders als ein Licht.',
+    ],
+    portrait: 'art/previews/w_coast.webp',
+  },
+  'kueste-2': {
+    chapter: 'Kapitel 5',
+    title: 'Die alten Stege',
+    text: [
+      '„Bei Flut schwanken die Bretter", warnt ein Fischer. „Aber nur über sie kommst du zum Leuchtturm."',
+      'Fynnox zieht den Schal fester und setzt die erste Pfote aufs Holz.',
+    ],
+    portrait: 'art/previews/w_coast.webp',
+  },
+  'kueste-3': {
+    chapter: 'Kapitel 6',
+    title: 'Zum Leuchtturm',
+    text: [
+      'Der Weg steigt über die Klippen. Unten rauscht die Brandung, oben kreisen die Möwen.',
+      'Ganz oben wartet das Licht — und mit ihm der letzte verschwundene Kristall.',
+    ],
+    portrait: 'art/previews/w_coast.webp',
+  },
   'candy-1': {
     chapter: 'Kapitel 4',
     title: 'Ein süßer Wind',
@@ -84,6 +111,36 @@ const OUTRO: Record<string, StoryBeat> = {
     ],
     portrait: 'art/fynnox/hero.webp',
     cta: 'Weiter',
+  },
+  'kueste-1': {
+    chapter: 'Kapitel 4',
+    title: 'Spuren im Sand',
+    text: [
+      'Die Bucht liegt wieder ordentlich da, und die Möwen haben sich beruhigt.',
+      'Im nassen Sand führt eine Spur zu den alten Stegen hinaus aufs Wasser.',
+    ],
+    portrait: 'art/fynnox/hero.webp',
+    cta: 'Weiter',
+  },
+  'kueste-2': {
+    chapter: 'Kapitel 5',
+    title: 'Über dem Wasser',
+    text: [
+      'Die Truhe am Ende des Stegs war randvoll — aber der Kristall war nicht dabei.',
+      'Vom letzten Brett aus sieht Fynnox den Weg hinauf zu den Klippen.',
+    ],
+    portrait: 'art/fynnox/hero.webp',
+    cta: 'Weiter',
+  },
+  'kueste-3': {
+    chapter: 'Kapitel 6',
+    title: 'Das Licht am Meer',
+    text: [
+      'Oben im Leuchtturm liegt er: der letzte Kristall, warm und ruhig leuchtend.',
+      'Fynnox hält ihn hoch. Weit hinten am Horizont steigt Rauch über einem Berg auf — das nächste Abenteuer wartet schon.',
+    ],
+    portrait: 'art/fynnox/hero.webp',
+    cta: 'Zum Menü',
   },
   'candy-1': {
     chapter: 'Kapitel 4',

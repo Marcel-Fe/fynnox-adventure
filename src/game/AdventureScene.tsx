@@ -2,12 +2,10 @@ import { useMemo, useEffect, Suspense } from 'react'
 import { useThree } from '@react-three/fiber'
 import { Sky, Environment } from '@react-three/drei'
 import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing'
-import { Trees3D } from '../render/Trees3D'
 import { TreeBillboards } from '../render/TreeBillboards'
 import { GroundDeco } from '../render/GroundDeco'
 import { HouseBillboards } from '../render/HouseBillboards'
 import { Scenery } from '../render/Scenery'
-import { Houses } from '../render/Houses'
 import { Backdrop } from '../render/Parallax3D'
 import { Life } from '../render/Life'
 import { Fx } from '../render/Fx'
@@ -62,9 +60,43 @@ function makeSprinkleTexture(): THREE.CanvasTexture {
   return t
 }
 
+// Feiner Strandsand: warmer Grundton mit Körnung und ein paar hellen Muschelsplittern.
+// Eine eingefärbte Gras-Textur wäre hier schlammig geworden (grün × sandfarben).
+function makeSandTexture(): THREE.CanvasTexture {
+  const c = document.createElement('canvas')
+  c.width = 256
+  c.height = 256
+  const ctx = c.getContext('2d')!
+  ctx.fillStyle = '#f0dcae'
+  ctx.fillRect(0, 0, 256, 256)
+  let s = 9182
+  const r = () => ((s = (s * 1664525 + 1013904223) >>> 0), s / 0xffffffff)
+  // Körnung
+  for (let i = 0; i < 2600; i++) {
+    const v = r()
+    ctx.fillStyle = v > 0.5 ? 'rgba(214,182,132,0.55)' : 'rgba(255,246,220,0.5)'
+    ctx.fillRect(r() * 256, r() * 256, 1.6, 1.6)
+  }
+  // vereinzelte Muschelsplitter
+  for (let i = 0; i < 26; i++) {
+    ctx.fillStyle = 'rgba(255,252,244,0.75)'
+    ctx.beginPath()
+    ctx.ellipse(r() * 256, r() * 256, 2.2 + r() * 1.6, 1.2 + r(), r() * Math.PI, 0, Math.PI * 2)
+    ctx.fill()
+  }
+  const t = new THREE.CanvasTexture(c)
+  t.colorSpace = THREE.SRGBColorSpace
+  t.wrapS = THREE.RepeatWrapping
+  t.wrapT = THREE.RepeatWrapping
+  return t
+}
+
 function Ground({ minX, maxX, look }: { minX: number; maxX: number; look: StageLook }) {
   const tex = useMemo(() => {
-    const t = look.groundMap === 'grass' ? makeGrassTexture() : makeSprinkleTexture()
+    const t =
+      look.groundMap === 'grass' ? makeGrassTexture()
+      : look.groundMap === 'sand' ? makeSandTexture()
+      : makeSprinkleTexture()
     t.repeat.set(60, 60)
     // Der Boden wird extrem flach betrachtet (Seitenkamera dicht über der Wiese).
     // Ohne anisotrope Filterung zerfällt die Textur dabei in sichtbare Kachel-Bahnen.
@@ -129,34 +161,34 @@ export function AdventureScene({ level }: { level: LevelDef }) {
 
       {level.bg && (
         <Suspense fallback={null}>
-          <Backdrop url={level.bg} />
+          {/* Lage der Panorama-Ebene kommt aus dem Welt-Look: jedes Bild hat seinen
+              Horizont woanders, mit festen Werten säße es schief zum 3D-Boden. */}
+          <Backdrop url={level.bg} y={look.bgY} height={look.bgHeight} factor={look.bgFactor} />
         </Suspense>
       )}
 
       <Ground minX={level.startX} maxX={level.goalX} look={look} />
       {/* Prozedurales Wasser nur ohne gemalten Hintergrund: das Artwork bringt Fluss,
           See und Wasserfälle selbst mit — sonst schweben die Wasserfall-Flächen davor.
-          Und nur im Wald: ein blauer Fluss in der Zuckerwelt wäre fehl am Platz. */}
-      {!level.bg && level.world === 'forest' && <Water minX={level.startX} maxX={level.goalX} />}
-      {look.houses && <Houses minX={level.startX} maxX={level.goalX} />}
+          Welche Welt überhaupt prozedurales Wasser will, steht im Welt-Look. */}
+      {!level.bg && look.water === 'river' && <Water minX={level.startX} maxX={level.goalX} />}
       {look.houseArt.length > 0 && (
         <Suspense fallback={null}>
           <HouseBillboards minX={level.startX} maxX={level.goalX} look={look} />
         </Suspense>
       )}
-      {/* Gemalte Bäume, sobald für diese Welt Artwork vorliegt — sonst die alte
-          Geometrie-Variante als Übergangslösung. */}
-      {look.treeArt.length > 0 ? (
+      {/* Gemalte Bäume. KEIN Rückfall auf die alte Geometrie-Variante: die Kugel-Kronen
+          hat der Nutzer ausdrücklich abgelehnt. Fehlt Artwork, bleibt die Welt eben
+          baumlos, bis es vorliegt. */}
+      {look.treeArt.length > 0 && (
         <Suspense fallback={null}>
           <TreeBillboards minX={level.startX} maxX={level.goalX} look={look} />
         </Suspense>
-      ) : (
-        <Trees3D minX={level.startX} maxX={level.goalX} look={look} />
       )}
-      <Scenery minX={level.startX} maxX={level.goalX} hills={!level.bg} deco={!look.groundDeco} look={look} />
-      {look.groundDeco && (
+      <Scenery minX={level.startX} maxX={level.goalX} hills={!level.bg} deco={look.deco.length === 0} look={look} />
+      {look.deco.length > 0 && (
         <Suspense fallback={null}>
-          <GroundDeco minX={level.startX} maxX={level.goalX} />
+          <GroundDeco minX={level.startX} maxX={level.goalX} types={look.deco} />
         </Suspense>
       )}
       <Life minX={level.startX} maxX={level.goalX} />
