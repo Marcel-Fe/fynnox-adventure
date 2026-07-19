@@ -3,6 +3,7 @@ import { useThree } from '@react-three/fiber'
 import { Sky, Environment } from '@react-three/drei'
 import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing'
 import { Trees3D } from '../render/Trees3D'
+import { TreeBillboards } from '../render/TreeBillboards'
 import { Scenery } from '../render/Scenery'
 import { Houses } from '../render/Houses'
 import { Backdrop } from '../render/Parallax3D'
@@ -63,6 +64,9 @@ function Ground({ minX, maxX, look }: { minX: number; maxX: number; look: StageL
   const tex = useMemo(() => {
     const t = look.groundMap === 'grass' ? makeGrassTexture() : makeSprinkleTexture()
     t.repeat.set(60, 60)
+    // Der Boden wird extrem flach betrachtet (Seitenkamera dicht über der Wiese).
+    // Ohne anisotrope Filterung zerfällt die Textur dabei in sichtbare Kachel-Bahnen.
+    t.anisotropy = 8
     return t
   }, [look.groundMap])
   const w = maxX - minX + 240
@@ -133,7 +137,15 @@ export function AdventureScene({ level }: { level: LevelDef }) {
           Und nur im Wald: ein blauer Fluss in der Zuckerwelt wäre fehl am Platz. */}
       {!level.bg && level.world === 'forest' && <Water minX={level.startX} maxX={level.goalX} />}
       {look.houses && <Houses minX={level.startX} maxX={level.goalX} />}
-      <Trees3D minX={level.startX} maxX={level.goalX} look={look} />
+      {/* Gemalte Bäume, sobald für diese Welt Artwork vorliegt — sonst die alte
+          Geometrie-Variante als Übergangslösung. */}
+      {look.treeArt.length > 0 ? (
+        <Suspense fallback={null}>
+          <TreeBillboards minX={level.startX} maxX={level.goalX} look={look} />
+        </Suspense>
+      ) : (
+        <Trees3D minX={level.startX} maxX={level.goalX} look={look} />
+      )}
       <Scenery minX={level.startX} maxX={level.goalX} hills={!level.bg} look={look} />
       <Life minX={level.startX} maxX={level.goalX} />
 

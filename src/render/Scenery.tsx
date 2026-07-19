@@ -141,32 +141,16 @@ export function Scenery({ minX, maxX, hills = true, look = STAGE.forest }: { min
         ))}
       </Instances>
 
-      {/* Grasbüschel (kleine grüne Kegel) */}
-      <Instances limit={data.tufts.length}>
-        <coneGeometry args={[0.5, 1, 6]} />
-        <meshStandardMaterial color={look.tuft} roughness={0.55} envMapIntensity={0.75} />
-        {data.tufts.map((t, i) => (
-          <Instance key={i} ref={(el: THREE.Object3D | null) => { tuftRefs.current[i] = el }} position={t.p} scale={[t.s, t.s * 1.6, t.s]} />
-        ))}
-      </Instances>
+      {/* Grasbüschel und Steine: bewusst NICHT gerendert. Als Kegel bzw. Dodekaeder
+          fielen sie neben den gemalten Bäumen sofort als „eckig" auf — genau die
+          Kritik des Nutzers. Sie kommen als gemalte Billboards zurück, sobald das
+          Artwork vorliegt (Prompt-Paket B in .planning/asset-prompts-2026-07-19.md).
+          Die Platzierungs-Daten bleiben erhalten, damit der Wiedereinbau identisch sitzt. */}
 
-      {/* Steine */}
-      <Instances limit={data.rocks.length} castShadow receiveShadow>
-        <dodecahedronGeometry args={[1, 0]} />
-        <meshStandardMaterial color={look.rock} roughness={1} flatShading />
-        {data.rocks.map((rk, i) => (
-          <Instance key={i} position={rk.p} scale={[rk.s, rk.s * 0.7, rk.s]} rotation={[0, rk.rot, 0]} />
-        ))}
-      </Instances>
-
-      {/* Büsche (kleine runde Laubkugeln) */}
-      <Instances limit={data.bushes.length} castShadow>
-        <sphereGeometry args={[1, 12, 10]} />
-        <meshStandardMaterial color={look.bush} roughness={0.5} envMapIntensity={0.75} />
-        {data.bushes.map((bs, i) => (
-          <Instance key={i} position={bs.p} scale={[bs.s * 1.3, bs.s, bs.s]} />
-        ))}
-      </Instances>
+      {/* Büsche: bewusst NICHT gerendert. Als Laubkugeln fielen sie neben den gemalten
+          Bäumen sofort als „eckig" auf. Sie kommen als gemalte Billboards zurück
+          (Prompt-Paket A/B in .planning/asset-prompts-2026-07-19.md). Die Daten bleiben
+          berechnet, damit die Platzierung beim Wiedereinbau identisch bleibt. */}
     </>
   )
 }

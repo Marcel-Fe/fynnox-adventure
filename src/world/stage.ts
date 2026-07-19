@@ -39,6 +39,10 @@ export interface StageLook {
   ground: string
   groundMap: 'grass' | 'sprinkles'
   // Deko
+  // Gemalte Baum-Billboards (Nutzer-Artwork unter public/art/deco/). Sind welche
+  // hinterlegt, ersetzen sie die prozeduralen Bäume komplett. Leer = Fallback auf
+  // die alte Geometrie-Variante, bis das Artwork für diese Welt vorliegt.
+  treeArt: { url: string; aspect: number }[]
   crown: CrownLook
   trunks: string[]
   tuft: string
@@ -59,13 +63,19 @@ export const STAGE: Record<DecorKind, StageLook> = {
     envPreset: 'park', envIntensity: 0.55,
     ambient: 0.22, hemiSky: '#cdeaff', hemiGround: '#4d6b3f', hemiIntensity: 0.42,
     sunColor: '#fff2d6', sunIntensity: 2.1,
-    ground: '#5fb069', groundMap: 'grass',
+    // Etwas gedämpfter und wärmer als früher (#5fb069): das satte Neongrün stach
+    // gegen das gemalte Hintergrund-Artwork ab und ließ den Boden wie Kunstrasen wirken.
+    ground: '#6fa855', groundMap: 'grass',
+    treeArt: [{ url: 'art/deco/tree_oak.webp', aspect: 0.6992 }],
     crown: { hue: 0.31, hueVar: 0.05, sat: 0.68, light: 0.27 },
     trunks: ['#7a5230', '#6b4423', '#835a34', '#5f3d22'],
     tuft: '#3f9a52', bush: '#3d9c52', rock: '#9a9488',
     flowers: ['#ff5a7a', '#ffd23f', '#ffffff', '#ff8fc4', '#7ac8ff'],
     hillNear: '#5f9e57', hillFar: '#7fa6bf',
-    houses: true,
+    // Vorerst AUS: die prozeduralen Box-Häuser fallen neben den gemalten Bäumen
+    // sofort als eckig auf. Sie kommen als Billboards zurück, sobald das Haus-Artwork
+    // vorliegt (Prompt-Paket C in .planning/asset-prompts-2026-07-19.md).
+    houses: false,
   },
 
   // --- Welt 2: Zuckerwirbel — rosa Zuckerguss, Lolli-Bäume, Streusel-Boden ---
@@ -77,6 +87,7 @@ export const STAGE: Record<DecorKind, StageLook> = {
     ambient: THEMES.candy.ambient, hemiSky: THEMES.candy.hemiSky, hemiGround: THEMES.candy.hemiGround, hemiIntensity: 0.6,
     sunColor: '#ffe6f4', sunIntensity: 1.9,
     ground: '#f7bcdd', groundMap: 'sprinkles',
+    treeArt: [],
     crown: { hue: 0.92, hueVar: 0.14, sat: 0.62, light: 0.66 },
     trunks: ['#fff3e0', '#ffe6f2', '#f6d9b0', '#ffd9c2'],
     tuft: '#7fd8b0', bush: '#ff9ecd', rock: '#e6d6ff',
@@ -94,6 +105,7 @@ export const STAGE: Record<DecorKind, StageLook> = {
     ambient: THEMES.volcano.ambient, hemiSky: THEMES.volcano.hemiSky, hemiGround: THEMES.volcano.hemiGround, hemiIntensity: 0.5,
     sunColor: '#ffb070', sunIntensity: 1.8,
     ground: '#5a453f', groundMap: 'sprinkles',
+    treeArt: [],
     crown: { hue: 0.06, hueVar: 0.03, sat: 0.5, light: 0.22 },
     trunks: ['#3a2a24', '#2e211c', '#4a3630'],
     tuft: '#6b4a3a', bush: '#5a3a30', rock: '#4a4440',
@@ -109,6 +121,7 @@ export const STAGE: Record<DecorKind, StageLook> = {
     ambient: THEMES.ice.ambient, hemiSky: THEMES.ice.hemiSky, hemiGround: THEMES.ice.hemiGround, hemiIntensity: 0.6,
     sunColor: '#eaf6ff', sunIntensity: 2.0,
     ground: '#e6f4ff', groundMap: 'sprinkles',
+    treeArt: [],
     crown: { hue: 0.52, hueVar: 0.06, sat: 0.3, light: 0.72 },
     trunks: ['#8fa8bc', '#7b93a8', '#a3b8c8'],
     tuft: '#bfe0f2', bush: '#d8eeff', rock: '#c2d4e0',
@@ -124,6 +137,7 @@ export const STAGE: Record<DecorKind, StageLook> = {
     ambient: THEMES.city.ambient, hemiSky: THEMES.city.hemiSky, hemiGround: THEMES.city.hemiGround, hemiIntensity: 0.55,
     sunColor: '#9a8cff', sunIntensity: 1.2,
     ground: '#241a4a', groundMap: 'sprinkles',
+    treeArt: [],
     crown: { hue: 0.75, hueVar: 0.16, sat: 0.7, light: 0.45 },
     trunks: ['#2a2444', '#1e1a36', '#3a3060'],
     tuft: '#3f6ad4', bush: '#5a3fb0', rock: '#2a2444',
