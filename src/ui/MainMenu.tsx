@@ -13,15 +13,17 @@ interface WorldTile {
   img: string
 }
 
-// Anzeige-Namen im Look der Dashboard-Vorlage; die technischen Level-/World-Keys bleiben.
-// Ob eine Welt spielbar ist, ergibt sich jetzt aus dem Fortschritt (WORLD_GROUPS), nicht
-// mehr aus einem festen Flag.
+// Die sechs Welten aus dem Konzept-Artwork des Nutzers, inklusive seiner Kurzbeschreibungen.
+// Vorher standen hier aus dem Kart-Projekt geerbte Fantasienamen mit Rennstrecken-Bildern.
+// Ob eine Welt spielbar ist, ergibt sich aus dem Fortschritt (WORLD_GROUPS), nicht aus
+// einem festen Flag.
 const WORLDS: WorldTile[] = [
-  { key: 'forest', name: 'Sonnenwald', subtitle: 'Grünes Tal', img: 'art/previews/wald.png' },
-  { key: 'candy', name: 'Zuckerwirbel', subtitle: 'Schaffe zuerst den Wald', img: 'art/previews/zuckerwirbel.png' },
-  { key: 'volcano', name: 'Vulkanlande', subtitle: 'Bald', img: 'art/previews/vulkan.png' },
-  { key: 'ice', name: 'Eiswindtundra', subtitle: 'Bald', img: 'art/previews/gletscher.png' },
-  { key: 'city', name: 'Sternenstadt', subtitle: 'Bald', img: 'art/previews/neon.png' },
+  { key: 'forest', name: 'Sonnenwald', subtitle: 'Lebendige Wälder voller Geheimnisse', img: 'art/previews/w_forest.webp' },
+  { key: 'coast', name: 'Küstenbucht', subtitle: 'Strände, Häfen und klares Wasser', img: 'art/previews/w_coast.webp' },
+  { key: 'lava', name: 'Lavahöhle', subtitle: 'Hitze, Lavaflüsse und Power-ups', img: 'art/previews/w_lava.webp' },
+  { key: 'winter', name: 'Winterwald', subtitle: 'Rutschiges Eis, verborgene Höhlen', img: 'art/previews/w_winter.webp' },
+  { key: 'ruins', name: 'Vergessene Stadt', subtitle: 'Alte Ruinen voller Fallen', img: 'art/previews/w_ruins.webp' },
+  { key: 'crystal', name: 'Kristallhöhlen', subtitle: 'Schillernde Kristalle, dunkle Seen', img: 'art/previews/w_crystal.webp' },
 ]
 
 // Rechte Navigations-Leiste. Nur „Spielen" ist echt; die kommenden Bereiche sind klar
@@ -157,7 +159,9 @@ export function MainMenu() {
           <div style={{ fontSize: 14, fontWeight: 800, letterSpacing: 0.5, textTransform: 'uppercase', margin: '0 6px 10px', textShadow: '0 2px 6px rgba(0,0,0,0.7)' }}>
             🍃 Wähle deine Welt
           </div>
-          <div style={{ display: 'flex', gap: 12, overflowX: 'auto', paddingBottom: 8 }}>
+          {/* Breite/Abstand so gewählt, dass alle SECHS Welten nebeneinander in den
+              Platz links der Navigationsleiste passen (6×142 + 5×9 = 897 < 920). */}
+          <div style={{ display: 'flex', gap: 9, overflowX: 'auto', paddingBottom: 8 }}>
             {WORLDS.map((w) => {
               const open = worldOpen(w.key)
               const progress = progressOf(w.key)
@@ -169,7 +173,7 @@ export function MainMenu() {
                   onClick={() => open && setOpenWorld(w.key)}
                   disabled={!open}
                   style={{
-                    position: 'relative', flex: '0 0 auto', width: 165, height: 138, borderRadius: 18, overflow: 'hidden',
+                    position: 'relative', flex: '0 0 auto', width: 142, height: 134, borderRadius: 16, overflow: 'hidden',
                     padding: 0, background: '#0b1220', color: '#fff', border: `3px solid ${open ? C.orange : 'rgba(255,255,255,0.22)'}`,
                     boxShadow: open ? `0 10px 26px rgba(0,0,0,0.45), 0 0 22px rgba(255,122,47,0.4)` : '0 8px 20px rgba(0,0,0,0.4)',
                   }}
@@ -184,9 +188,9 @@ export function MainMenu() {
                     <span style={{ position: 'absolute', right: 8, top: 8, width: 30, height: 30, borderRadius: '50%', background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15 }}>🔒</span>
                   )}
 
-                  <div style={{ position: 'absolute', left: 0, bottom: 0, width: '100%', padding: '16px 12px 12px', textAlign: 'left' }}>
-                    <div style={{ fontWeight: 800, fontSize: 16, lineHeight: 1.2 }}>{w.name}</div>
-                    <div style={{ fontSize: 12.5, fontWeight: 600, opacity: 0.85, lineHeight: 1.3 }}>
+                  <div style={{ position: 'absolute', left: 0, bottom: 0, width: '100%', padding: '14px 10px 10px', textAlign: 'left' }}>
+                    <div style={{ fontWeight: 800, fontSize: 14.5, lineHeight: 1.15 }}>{w.name}</div>
+                    <div style={{ fontSize: 11, fontWeight: 600, opacity: 0.85, lineHeight: 1.25 }}>
                       {open
                         ? progress > 0
                           ? `Fortschritt: ${progress} %`

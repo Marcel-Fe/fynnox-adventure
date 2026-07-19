@@ -6,7 +6,7 @@ import { player, resetPlayer, respawnAtCheckpoint } from './playerState'
 import { controls } from './controls'
 import { stepPlayer, type Platform } from './physics'
 import { useGameStore } from '../store/gameStore'
-import { computeStars, totalGemCount, type LevelDef } from './level'
+import { computeStars, goalDone, goalsOf, totalGemCount, type LevelDef, type RunProgress } from './level'
 
 // Bewegt Fynnox über die Physik, kümmert sich um Sturz-Respawn (letzter Checkpoint)
 // und Ziel-Erkennung (→ Ergebnis-Screen mit Sternebewertung).
@@ -38,10 +38,18 @@ export function Player({ level, platforms }: { level: LevelDef; platforms?: Plat
     if (!finished.current && player.x >= level.goalX) {
       finished.current = true
       const st = useGameStore.getState()
-      const stars = computeStars(st.coins, level.coins.length)
+      const progress: RunProgress = {
+        coins: st.coins,
+        gems: st.gems,
+        stars: st.stars,
+        chestOpen: st.chestOpen,
+        questDone: st.questDone,
+        talkedCount: Object.keys(st.talked).length,
+      }
       st.finish({
         levelId: level.id,
-        stars,
+        stars: computeStars(level, progress),
+        goalsDone: goalsOf(level).map((g) => goalDone(g, level, progress)),
         coins: st.coins,
         totalCoins: level.coins.length,
         gems: st.gems,

@@ -54,6 +54,12 @@ const WALD_2: LevelDef = {
   ],
   key: { x: 78, y: 8.8 },
   chest: { x: 100, y: 0, gems: 3 },
+  // Dieses Level belohnt Erkunden und Reden statt reines Sammeln.
+  goals: [
+    { kind: 'finish', label: 'Erreiche die Ziel-Flagge' },
+    { kind: 'stars', label: 'Finde alle 3 versteckten Sterne' },
+    { kind: 'talk', label: 'Sprich mit beiden Waldbewohnern' },
+  ],
   checkpoints: [34, 68],
   npcs: [
     {
@@ -123,6 +129,12 @@ const WALD_3: LevelDef = {
   ],
   key: { x: 64, y: 9.4 },
   chest: { x: 92, y: 0, gems: 4 },
+  // Kristallhain: hier zählen die Kristalle und die Aufgabe des Auftraggebers.
+  goals: [
+    { kind: 'finish', label: 'Erreiche die Ziel-Flagge' },
+    { kind: 'gems', label: 'Sammle alle Kristalle (auch die in der Truhe)' },
+    { kind: 'quest', label: 'Bring die Aufgabe zu Ende' },
+  ],
   checkpoints: [36, 68],
   npcs: [
     {
@@ -236,9 +248,13 @@ export interface WorldGroup {
 
 // Reihenfolge der Welten und ihrer Level. Daraus ergibt sich auch die
 // Freischaltung: Level N+1 öffnet, sobald N abgeschlossen ist.
+// Aktuell ausgebaute Welten. `candy-1` bleibt als Level erhalten (siehe LEVELS), taucht
+// hier aber nicht mehr auf: das Konzept-Artwork des Nutzers vom 19.07. definiert die
+// Welten neu (Sonnenwald, Küstenbucht, Lavahöhle, Winterwald, Vergessene Stadt,
+// Kristallhöhlen) — „Zuckerwirbel" war aus dem Kart-Projekt geerbt und kommt darin nicht
+// vor. Das Level wird wieder eingehängt, sobald es eine passende Welt hat.
 export const WORLD_GROUPS: WorldGroup[] = [
   { key: 'forest', name: 'Sonnenwald', levels: ['wald-1', 'wald-2', 'wald-3'] },
-  { key: 'candy', name: 'Zuckerwirbel', levels: ['candy-1'] },
 ]
 
 // Alle Level in Spielreihenfolge.

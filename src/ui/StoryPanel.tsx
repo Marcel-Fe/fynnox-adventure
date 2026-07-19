@@ -24,7 +24,7 @@ export function StoryPanel() {
         justifyContent: 'center', padding: 20, color: '#fff', overflow: 'hidden',
       }}
     >
-      <img src={asset('art/previews/wald.png')} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(14px) brightness(0.45)', transform: 'scale(1.1)' }} />
+      <img src={asset('art/bg/wald/far.webp')} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(14px) brightness(0.45)', transform: 'scale(1.1)' }} />
       <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(8,16,32,0.75), rgba(6,12,24,0.92))' }} />
 
       <div

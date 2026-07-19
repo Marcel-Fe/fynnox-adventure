@@ -4,6 +4,7 @@ import { useTexture, Html } from '@react-three/drei'
 import * as THREE from 'three'
 import { asset } from '../utils/asset'
 import { player } from './playerState'
+import { useGameStore } from '../store/gameStore'
 import type { NpcDefData } from './level'
 
 // Figur als freigestelltes Artwork-Billboard (kein 3D-Modell nötig).
@@ -13,7 +14,7 @@ import type { NpcDefData } from './level'
 
 const REACH = 7
 
-export function SpriteNpc({ def }: { def: NpcDefData }) {
+export function SpriteNpc({ def, id }: { def: NpcDefData; id: number }) {
   const tex = useTexture(asset(def.sprite!))
   tex.colorSpace = THREE.SRGBColorSpace
 
@@ -32,7 +33,10 @@ export function SpriteNpc({ def }: { def: NpcDefData }) {
     const isNear = Math.abs(player.x - def.x) < REACH
     if (isNear !== near) {
       setNear(isNear)
-      if (isNear && def.lines.length > 1) setLine((n) => (n + 1) % def.lines.length)
+      if (isNear) {
+        if (def.lines.length > 1) setLine((n) => (n + 1) % def.lines.length)
+        useGameStore.getState().markTalked(id) // zählt auf das „Sprich mit allen"-Ziel ein
+      }
     }
     const g = group.current
     if (!g) return

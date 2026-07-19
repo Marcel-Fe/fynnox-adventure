@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react'
 import { useGameStore } from '../store/gameStore'
 import { getLevel, nextLevelId } from '../game/levels'
+import { goalsOf } from '../game/level'
 import { asset } from '../utils/asset'
 import { C } from './theme'
 
@@ -68,6 +69,29 @@ export function ResultScreen() {
           )}
         </div>
 
+        {/* Level-Ziele: zeigt, WOFÜR es die Sterne gab — und was beim nächsten
+            Versuch noch drin ist. */}
+        {result.goalsDone && (
+          <div style={{ margin: '16px auto 0', maxWidth: 360, textAlign: 'left' }}>
+            {goalsOf(getLevel(result.levelId)).map((g, i) => {
+              const done = result.goalsDone?.[i]
+              return (
+                <div
+                  key={i}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 9, padding: '5px 2px',
+                    fontSize: 14.5, fontWeight: 700,
+                    color: done ? C.green : '#8b93a6',
+                  }}
+                >
+                  <span style={{ fontSize: 16 }}>{done ? '✅' : '⬜'}</span>
+                  <span style={{ textDecoration: done ? 'none' : 'none' }}>{g.label}</span>
+                </div>
+              )
+            })}
+          </div>
+        )}
+
         {nextId && (
           <div style={{ marginTop: 16, fontSize: 14.5, fontWeight: 700, color: C.green }}>
             🔓 {getLevel(nextId).name} freigeschaltet!
@@ -87,10 +111,11 @@ export function ResultScreen() {
         </div>
       </div>
 
+      {/* Der echte Fynnox statt des alten Vektor-Platzhalters mit „P"-Anzug. */}
       <img
-        src={asset('art/fynnox/victory.png')}
+        src={asset('art/fynnox/hero.webp')}
         alt=""
-        style={{ position: 'fixed', bottom: 0, left: 24, height: '46vh', maxHeight: 340, pointerEvents: 'none', filter: 'drop-shadow(0 8px 14px rgba(0,0,0,0.35))' }}
+        style={{ position: 'fixed', bottom: 0, left: 24, height: '52vh', maxHeight: 380, pointerEvents: 'none', filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.45))' }}
       />
     </div>
   )
@@ -98,7 +123,8 @@ export function ResultScreen() {
 
 function btn(bg: string): CSSProperties {
   return {
-    background: bg, color: '#fff', fontWeight: 800, fontSize: 18, border: 'none',
-    borderRadius: 16, padding: '12px 26px', cursor: 'pointer', boxShadow: '0 5px 0 rgba(0,0,0,0.18)',
+    background: bg, color: '#fff', fontWeight: 800, fontSize: 17, border: 'none',
+    borderRadius: 15, padding: '11px 20px', cursor: 'pointer', boxShadow: '0 5px 0 rgba(0,0,0,0.18)',
+    whiteSpace: 'nowrap',
   }
 }

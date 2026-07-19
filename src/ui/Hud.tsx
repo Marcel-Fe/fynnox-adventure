@@ -1,6 +1,6 @@
 import { useGameStore } from '../store/gameStore'
 import { getLevel } from '../game/levels'
-import { totalGemCount } from '../game/level'
+import { goalDone, goalsOf, totalGemCount, type RunProgress } from '../game/level'
 import { asset } from '../utils/asset'
 import { C, pill } from './theme'
 
@@ -10,10 +10,21 @@ export function Hud() {
   const gems = useGameStore((s) => s.gems)
   const stars = useGameStore((s) => s.stars)
   const levelId = useGameStore((s) => s.levelId)
+  const chestOpen = useGameStore((s) => s.chestOpen)
+  const questDone = useGameStore((s) => s.questDone)
+  const talked = useGameStore((s) => s.talked)
   const level = getLevel(levelId)
   const total = level.coins.length
   const gemTotal = totalGemCount(level)
   const starTotal = level.stars?.length ?? 0
+
+  // Live-Stand der Level-Ziele. Ohne diese Anzeige wüsste niemand, dass es außer
+  // „ans Ende laufen" noch etwas zu tun gibt.
+  const progress: RunProgress = {
+    coins, gems, stars, chestOpen, questDone,
+    talkedCount: Object.keys(talked).length,
+  }
+  const goals = goalsOf(level)
 
   return (
     <>
@@ -38,8 +49,42 @@ export function Hud() {
           </div>
         )}
       </div>
-      <div style={{ position: 'fixed', right: 16, top: 14, padding: '9px 18px', fontSize: 18, ...pill }}>
-        {level.name}
+      <div style={{ position: 'fixed', right: 16, top: 14, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
+        <div style={{ padding: '9px 18px', fontSize: 18, ...pill }}>{level.name}</div>
+
+        {/* Ziel-Liste. Das „finish"-Ziel wird weggelassen — dass man ans Ende laufen
+            muss, versteht sich von selbst und würde nur Platz kosten. */}
+        <div
+          style={{
+            background: 'rgba(31,44,77,0.82)', backdropFilter: 'blur(4px)', color: '#fff',
+            // marginTop schafft Platz für den globalen Mute-Knopf, der unter der
+            // Level-Pille sitzt — sonst überlappen beide.
+            marginTop: 40,
+            borderRadius: 14, padding: '9px 13px', maxWidth: 260,
+            border: '2px solid rgba(255,255,255,0.16)', boxShadow: '0 4px 14px rgba(0,0,0,0.28)',
+          }}
+        >
+          <div style={{ fontSize: 10.5, fontWeight: 900, letterSpacing: 0.9, textTransform: 'uppercase', opacity: 0.72, marginBottom: 4 }}>
+            Aufgaben
+          </div>
+          {goals.filter((g) => g.kind !== 'finish').map((g, i) => {
+            const done = goalDone(g, level, progress)
+            return (
+              <div
+                key={i}
+                style={{
+                  display: 'flex', alignItems: 'flex-start', gap: 6, fontSize: 12.5,
+                  fontWeight: 700, lineHeight: 1.3, padding: '2px 0',
+                  color: done ? '#7ff0a6' : '#e6ecf7',
+                  opacity: done ? 0.85 : 1,
+                }}
+              >
+                <span>{done ? '✅' : '⬜'}</span>
+                <span>{g.label}</span>
+              </div>
+            )
+          })}
+        </div>
       </div>
     </>
   )

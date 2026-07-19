@@ -163,8 +163,8 @@ export function AdventureScene({ level }: { level: LevelDef }) {
 
       <Suspense fallback={null}>
         <Platforms platforms={level.platforms} />
+        <MovingPlatforms defs={movers} live={liveMovers} />
       </Suspense>
-      <MovingPlatforms defs={movers} live={liveMovers} />
       <Suspense fallback={null}>
         <Coins coins={level.coins} />
         {level.gems && <Gems gems={level.gems} />}
@@ -174,7 +174,7 @@ export function AdventureScene({ level }: { level: LevelDef }) {
         {level.chest && <Chest def={level.chest} />}
         <Checkpoints positions={level.checkpoints} />
         <Goal x={level.goalX} />
-        {level.npcs?.map((n, i) => (n.sprite ? <SpriteNpc key={i} def={n} /> : <Villager key={i} def={n} />))}
+        {level.npcs?.map((n, i) => (n.sprite ? <SpriteNpc key={i} def={n} id={i} /> : <Villager key={i} def={n} id={i} />))}
         {level.quest && (
           <Npc
             def={{ x: level.quest.npcX, model: level.quest.npcModel, tint: level.quest.npcTint }}

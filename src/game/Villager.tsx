@@ -5,6 +5,7 @@ import * as THREE from 'three'
 import { clone as skeletonClone } from 'three/examples/jsm/utils/SkeletonUtils.js'
 import { asset } from '../utils/asset'
 import { player } from './playerState'
+import { useGameStore } from '../store/gameStore'
 import type { NpcDefData } from './level'
 
 // Bewohner der Welt: Figuren, die einfach da sind, sich bewegen und bei Annäherung
@@ -16,7 +17,7 @@ const FALLBACK = asset('models/fynnox.glb')
 const BASE_H = 2.6
 const REACH = 7
 
-export function Villager({ def }: { def: NpcDefData }) {
+export function Villager({ def, id }: { def: NpcDefData; id: number }) {
   const url = def.model ? asset('models/' + def.model) : FALLBACK
   const { scene } = useGLTF(url)
   const isFallback = url === FALLBACK
@@ -63,8 +64,11 @@ export function Villager({ def }: { def: NpcDefData }) {
     const isNear = Math.abs(player.x - def.x) < REACH
     if (isNear !== near) {
       setNear(isNear)
-      // bei jeder neuen Annäherung den nächsten Spruch zeigen
-      if (isNear && def.lines.length > 1) setLine((n) => (n + 1) % def.lines.length)
+      if (isNear) {
+        // bei jeder neuen Annäherung den nächsten Spruch zeigen
+        if (def.lines.length > 1) setLine((n) => (n + 1) % def.lines.length)
+        useGameStore.getState().markTalked(id) // zählt auf das „Sprich mit allen"-Ziel ein
+      }
     }
     if (outer.current) {
       outer.current.position.y = yOff + Math.sin(t.current * 1.8) * 0.04

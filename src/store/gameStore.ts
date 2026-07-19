@@ -14,6 +14,7 @@ export interface RunResult {
   totalGems?: number
   foundStars?: number // gefundene versteckte Sterne
   totalStars?: number
+  goalsDone?: boolean[] // je Level-Ziel: erfüllt? (gleiche Reihenfolge wie goalsOf)
 }
 
 interface GameState {
@@ -26,6 +27,7 @@ interface GameState {
   questDone: boolean // Aufgabe des Level-NPCs erfüllt (bei NPC abgegeben)
   hasKey: boolean // Schlüssel zur Schatztruhe gefunden
   chestOpen: boolean // Truhe bereits geöffnet
+  talked: Record<number, boolean> // welche Figuren im Level schon angesprochen wurden
   result: RunResult | null
   save: SaveData
   pendingStory: { levelId: string; kind: StoryKind } | null
@@ -39,6 +41,7 @@ interface GameState {
   addStar: () => void
   takeKey: () => void
   openChest: () => void
+  markTalked: (id: number) => void
   completeQuest: () => void
   finish: (r: RunResult) => void
   toMenu: () => void
@@ -56,12 +59,13 @@ export const useGameStore = create<GameState>((set, get) => ({
   questDone: false,
   hasKey: false,
   chestOpen: false,
+  talked: {},
   result: null,
   save: loadSave(),
   pendingStory: null,
 
   start: (levelId) =>
-    set((s) => ({ screen: 'play', levelId, coins: 0, gems: 0, stars: 0, questDone: false, hasKey: false, chestOpen: false, result: null, pendingStory: null, runId: s.runId + 1 })),
+    set((s) => ({ screen: 'play', levelId, coins: 0, gems: 0, stars: 0, questDone: false, hasKey: false, chestOpen: false, talked: {}, result: null, pendingStory: null, runId: s.runId + 1 })),
 
   // Einstieg über das Menü: erst das Story-Kapitel (falls es eines gibt und es noch
   // nicht gezeigt wurde), dann das Level. Beim Wiederholen kommt kein Panel mehr.
@@ -115,6 +119,11 @@ export const useGameStore = create<GameState>((set, get) => ({
   takeKey: () => set({ hasKey: true }),
 
   openChest: () => set({ chestOpen: true }),
+
+  // Nur setzen, wenn die Figur wirklich neu ist — sonst löst jede Annäherung ein
+  // Store-Update und damit ein Re-Render der HUD-Zielliste aus.
+  markTalked: (id) =>
+    set((s) => (s.talked[id] ? {} : { talked: { ...s.talked, [id]: true } })),
 
   completeQuest: () => set({ questDone: true }),
 

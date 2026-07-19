@@ -41,7 +41,7 @@ const INTRO: Record<string, StoryBeat> = {
       'Hinter der Brücke steigt der Weg steil an. Ganz oben liegt der Hain, in dem alle Kristalle des Waldes wachsen.',
       'Von hier oben sieht Fynnox zum ersten Mal, wie groß sein Abenteuer wirklich ist.',
     ],
-    portrait: 'art/previews/wald.png',
+    portrait: 'art/previews/w_forest.webp',
   },
   'candy-1': {
     chapter: 'Kapitel 4',
@@ -50,7 +50,7 @@ const INTRO: Record<string, StoryBeat> = {
       'Aus dem Westen weht ein Duft nach Zuckerguss. Die Spur der Kristalle führt genau dorthin.',
       'Fynnox atmet tief durch. Der Zuckerwirbel wartet — weich, klebrig und voller Wirbel.',
     ],
-    portrait: 'art/previews/zuckerwirbel.png',
+    portrait: 'art/previews/w_coast.webp',
   },
 }
 
@@ -62,7 +62,7 @@ const OUTRO: Record<string, StoryBeat> = {
       'Am Ende des Weges glimmt ein Kristall wieder auf — leise, aber deutlich.',
       '„Du bist auf der richtigen Fährte", ruft Bo von der Lichtung. „Weiter zur Schaukelbrücke!"',
     ],
-    portrait: 'art/fynnox/victory.png',
+    portrait: 'art/fynnox/hero.webp',
     cta: 'Weiter',
   },
   'wald-2': {
@@ -72,7 +72,7 @@ const OUTRO: Record<string, StoryBeat> = {
       'Die Stege liegen wieder ruhig. Im Holz steckt ein kleiner Splitter Kristallstaub.',
       'Er glitzert bergauf — genau in Richtung Kristallhain.',
     ],
-    portrait: 'art/fynnox/victory.png',
+    portrait: 'art/fynnox/hero.webp',
     cta: 'Weiter',
   },
   'wald-3': {
@@ -80,9 +80,9 @@ const OUTRO: Record<string, StoryBeat> = {
     title: 'Der Hain leuchtet',
     text: [
       'Ein Kristall nach dem anderen erwacht. Der ganze Sonnenwald liegt wieder im Funkeln.',
-      'Doch ein Kristall fehlt — und aus dem Westen weht etwas sehr Süßes herüber.',
+      'Doch einer fehlt. Möwen schreien in der Ferne, und ein salziger Wind trägt Fynnox’ Blick nach Westen — zur Küstenbucht.',
     ],
-    portrait: 'art/fynnox/victory.png',
+    portrait: 'art/fynnox/hero.webp',
     cta: 'Weiter',
   },
   'candy-1': {

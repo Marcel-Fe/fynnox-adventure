@@ -65,6 +65,25 @@ export interface NpcDefData {
   lines: string[] // Sprüche, die die Figur bei Annäherung zeigt (wechseln durch)
 }
 
+// Level-Ziele — der Kern von „Punkte nicht nur durchs Springen".
+// Statt die Sterne allein an der Münz-Quote festzumachen, bekommt jedes Level drei
+// Ziele, die unterschiedliche Spielweisen belohnen: Erkunden (versteckte Sterne),
+// Sammeln (Kristalle), Reden (alle Figuren), Rätsel (Schlüssel → Truhe).
+// Bewusst DATEN statt Funktionen, damit Level-Definitionen einfache Objekte bleiben.
+export type GoalKind =
+  | 'finish' // Ziel-Flagge erreichen
+  | 'coins' // alle Pfotenmünzen
+  | 'gems' // alle Kristalle (inkl. Truhen-Inhalt)
+  | 'stars' // alle versteckten Sterne
+  | 'chest' // Truhe mit dem Schlüssel öffnen
+  | 'talk' // mit allen Figuren im Level sprechen
+  | 'quest' // Aufgabe des Auftraggebers abgeben
+
+export interface LevelGoal {
+  kind: GoalKind
+  label: string
+}
+
 export interface LevelDef {
   id: string
   name: string
@@ -80,6 +99,7 @@ export interface LevelDef {
   movers?: MoverDef[] // bewegliche Plattformen
   key?: Pickup // Schlüssel zur Truhe
   chest?: ChestDef // Schatztruhe (braucht den Schlüssel)
+  goals?: LevelGoal[] // bis zu 3; je erfülltes Ziel gibt es einen Stern
   npcs?: NpcDefData[] // weitere Figuren (reine Deko/Dialog, keine Quest)
   quest?: QuestDef
   bg?: string // gemalter Parallax-Hintergrund (Pfad unter public/); ersetzt die prozeduralen Hügel
@@ -155,6 +175,13 @@ export const FOREST_LEVEL: LevelDef = {
   // vor der Ziel-Flagge.
   key: { x: 71.5, y: 6.6 },
   chest: { x: 135, y: 0, gems: 3 },
+  // Ziele: ankommen, alles einsammeln — und als Rätsel den Schlüssel über der
+  // beweglichen Plattform holen, um die Truhe zu öffnen.
+  goals: [
+    { kind: 'finish', label: 'Erreiche die Ziel-Flagge' },
+    { kind: 'coins', label: 'Sammle alle 35 Pfotenmünzen' },
+    { kind: 'chest', label: 'Finde den Schlüssel und öffne die Truhe' },
+  ],
   checkpoints: [40, 74, 110],
   // Bewohner der Welt. Noch Platzhalter (umgefärbtes/skaliertes Fynnox-Modell), bis
   // eigene Figuren-GLBs vorliegen — Pipeline: docs/npc-pipeline.md.
@@ -189,9 +216,59 @@ export function totalGemCount(level: LevelDef): number {
   return (level.gems?.length ?? 0) + (level.chest?.gems ?? 0)
 }
 
-// Sternebewertung: 3 = alle Münzen, 2 = >= 60 %, 1 = Ziel erreicht.
-export function computeStars(collected: number, total: number): number {
-  if (total > 0 && collected >= total) return 3
-  if (collected >= Math.ceil(total * 0.6)) return 2
-  return 1
+// Fortschritt eines Laufs, so weit die Ziel-Auswertung ihn braucht.
+export interface RunProgress {
+  coins: number
+  gems: number
+  stars: number
+  chestOpen: boolean
+  questDone: boolean
+  talkedCount: number
+}
+
+// Fällt ein Level ohne eigene Ziele an, gilt diese Standard-Vorgabe — so bleiben
+// ältere Level-Definitionen ohne Anpassung spielbar.
+const DEFAULT_GOALS: LevelGoal[] = [
+  { kind: 'finish', label: 'Erreiche die Ziel-Flagge' },
+  { kind: 'coins', label: 'Sammle alle Pfotenmünzen' },
+  { kind: 'stars', label: 'Finde alle versteckten Sterne' },
+]
+
+export function goalsOf(level: LevelDef): LevelGoal[] {
+  return level.goals ?? DEFAULT_GOALS
+}
+
+// Ist ein einzelnes Ziel erfüllt? `finish` gilt beim Auswerten immer als erfüllt —
+// ausgewertet wird erst, wenn Fynnox die Flagge erreicht hat.
+export function goalDone(goal: LevelGoal, level: LevelDef, p: RunProgress): boolean {
+  switch (goal.kind) {
+    case 'finish':
+      return true
+    case 'coins':
+      return level.coins.length > 0 && p.coins >= level.coins.length
+    case 'gems': {
+      const total = totalGemCount(level)
+      return total > 0 && p.gems >= total
+    }
+    case 'stars': {
+      const total = level.stars?.length ?? 0
+      return total > 0 && p.stars >= total
+    }
+    case 'chest':
+      return p.chestOpen
+    case 'talk': {
+      const total = level.npcs?.length ?? 0
+      return total > 0 && p.talkedCount >= total
+    }
+    case 'quest':
+      return p.questDone
+  }
+}
+
+// Sterne = Anzahl erfüllter Level-Ziele (1..3). Ersetzt die reine Münz-Quote:
+// Erkunden, Sammeln und Reden zählen jetzt genauso wie Sprung-Geschick.
+export function computeStars(level: LevelDef, p: RunProgress): number {
+  const goals = goalsOf(level)
+  const done = goals.filter((g) => goalDone(g, level, p)).length
+  return Math.max(1, Math.min(3, done))
 }
