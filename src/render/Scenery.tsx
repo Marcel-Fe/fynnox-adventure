@@ -75,7 +75,9 @@ function DistantHills({ minX, maxX, near, far }: { minX: number; maxX: number; n
 // `hills`: prozedurale Hügel/Berge. Liegt ein gemalter Hintergrund vor, werden sie
 // abgeschaltet — sonst würden sie das Artwork verdecken und dagegen arbeiten.
 // `look`: Farbpalette der Welt (Standard = Wald, damit Welt 1 unverändert bleibt).
-export function Scenery({ minX, maxX, hills = true, look = STAGE.forest }: { minX: number; maxX: number; hills?: boolean; look?: StageLook }) {
+// `deco`: prozedurale Blumen. Liegt gemaltes Boden-Artwork vor, übernimmt `GroundDeco`
+// und die hier gemalten Vektor-Blüten werden abgeschaltet.
+export function Scenery({ minX, maxX, hills = true, deco = true, look = STAGE.forest }: { minX: number; maxX: number; hills?: boolean; deco?: boolean; look?: StageLook }) {
   const flowerTex = useMemo(() => makeFlowerTexture(), [])
   const flowerColors = look.flowers
   const data = useMemo(() => {
@@ -133,6 +135,7 @@ export function Scenery({ minX, maxX, hills = true, look = STAGE.forest }: { min
       {hills && <DistantHills minX={minX} maxX={maxX} near={look.hillNear} far={look.hillFar} />}
 
       {/* Blumen: farbige 5-Blütenblatt-Blüte (zur Kamera gerichtet) */}
+      {deco && (
       <Instances limit={data.flowers.length}>
         <planeGeometry args={[1, 1]} />
         <meshBasicMaterial map={flowerTex} transparent alphaTest={0.4} side={2} toneMapped={false} />
@@ -140,6 +143,7 @@ export function Scenery({ minX, maxX, hills = true, look = STAGE.forest }: { min
           <Instance key={i} ref={(el: THREE.Object3D | null) => { flowerRefs.current[i] = el }} position={f.p} scale={f.s} color={f.c} />
         ))}
       </Instances>
+      )}
 
       {/* Grasbüschel und Steine: bewusst NICHT gerendert. Als Kegel bzw. Dodekaeder
           fielen sie neben den gemalten Bäumen sofort als „eckig" auf — genau die

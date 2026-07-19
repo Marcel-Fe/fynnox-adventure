@@ -43,6 +43,9 @@ export interface StageLook {
   // hinterlegt, ersetzen sie die prozeduralen Bäume komplett. Leer = Fallback auf
   // die alte Geometrie-Variante, bis das Artwork für diese Welt vorliegt.
   treeArt: { url: string; aspect: number }[]
+  // Gemalte Boden-Deko (Felsen/Gras/Pilze/Blumen) liegt vor → ersetzt die prozeduralen
+  // Blumen und Kegel aus Scenery.
+  groundDeco: boolean
   crown: CrownLook
   trunks: string[]
   tuft: string
@@ -67,6 +70,7 @@ export const STAGE: Record<DecorKind, StageLook> = {
     // gegen das gemalte Hintergrund-Artwork ab und ließ den Boden wie Kunstrasen wirken.
     ground: '#6fa855', groundMap: 'grass',
     treeArt: [{ url: 'art/deco/tree_oak.webp', aspect: 0.6992 }],
+    groundDeco: true,
     crown: { hue: 0.31, hueVar: 0.05, sat: 0.68, light: 0.27 },
     trunks: ['#7a5230', '#6b4423', '#835a34', '#5f3d22'],
     tuft: '#3f9a52', bush: '#3d9c52', rock: '#9a9488',
@@ -88,6 +92,7 @@ export const STAGE: Record<DecorKind, StageLook> = {
     sunColor: '#ffe6f4', sunIntensity: 1.9,
     ground: '#f7bcdd', groundMap: 'sprinkles',
     treeArt: [],
+    groundDeco: false,
     crown: { hue: 0.92, hueVar: 0.14, sat: 0.62, light: 0.66 },
     trunks: ['#fff3e0', '#ffe6f2', '#f6d9b0', '#ffd9c2'],
     tuft: '#7fd8b0', bush: '#ff9ecd', rock: '#e6d6ff',
@@ -106,6 +111,7 @@ export const STAGE: Record<DecorKind, StageLook> = {
     sunColor: '#ffb070', sunIntensity: 1.8,
     ground: '#5a453f', groundMap: 'sprinkles',
     treeArt: [],
+    groundDeco: false,
     crown: { hue: 0.06, hueVar: 0.03, sat: 0.5, light: 0.22 },
     trunks: ['#3a2a24', '#2e211c', '#4a3630'],
     tuft: '#6b4a3a', bush: '#5a3a30', rock: '#4a4440',
@@ -122,6 +128,7 @@ export const STAGE: Record<DecorKind, StageLook> = {
     sunColor: '#eaf6ff', sunIntensity: 2.0,
     ground: '#e6f4ff', groundMap: 'sprinkles',
     treeArt: [],
+    groundDeco: false,
     crown: { hue: 0.52, hueVar: 0.06, sat: 0.3, light: 0.72 },
     trunks: ['#8fa8bc', '#7b93a8', '#a3b8c8'],
     tuft: '#bfe0f2', bush: '#d8eeff', rock: '#c2d4e0',
@@ -138,6 +145,7 @@ export const STAGE: Record<DecorKind, StageLook> = {
     sunColor: '#9a8cff', sunIntensity: 1.2,
     ground: '#241a4a', groundMap: 'sprinkles',
     treeArt: [],
+    groundDeco: false,
     crown: { hue: 0.75, hueVar: 0.16, sat: 0.7, light: 0.45 },
     trunks: ['#2a2444', '#1e1a36', '#3a3060'],
     tuft: '#3f6ad4', bush: '#5a3fb0', rock: '#2a2444',

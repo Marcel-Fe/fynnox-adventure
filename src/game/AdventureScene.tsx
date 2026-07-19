@@ -4,6 +4,7 @@ import { Sky, Environment } from '@react-three/drei'
 import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing'
 import { Trees3D } from '../render/Trees3D'
 import { TreeBillboards } from '../render/TreeBillboards'
+import { GroundDeco } from '../render/GroundDeco'
 import { Scenery } from '../render/Scenery'
 import { Houses } from '../render/Houses'
 import { Backdrop } from '../render/Parallax3D'
@@ -146,7 +147,12 @@ export function AdventureScene({ level }: { level: LevelDef }) {
       ) : (
         <Trees3D minX={level.startX} maxX={level.goalX} look={look} />
       )}
-      <Scenery minX={level.startX} maxX={level.goalX} hills={!level.bg} look={look} />
+      <Scenery minX={level.startX} maxX={level.goalX} hills={!level.bg} deco={!look.groundDeco} look={look} />
+      {look.groundDeco && (
+        <Suspense fallback={null}>
+          <GroundDeco minX={level.startX} maxX={level.goalX} />
+        </Suspense>
+      )}
       <Life minX={level.startX} maxX={level.goalX} />
 
       <Platforms platforms={level.platforms} />
