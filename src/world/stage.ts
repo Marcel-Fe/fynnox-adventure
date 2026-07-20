@@ -1,4 +1,4 @@
-import { THEMES, type DecorKind } from './themes'
+﻿import { THEMES, type DecorKind } from './themes'
 
 // Bühnen-Look je Welt — Himmel, Nebel, Licht, Boden und Deko an EINER Stelle.
 //
@@ -48,6 +48,12 @@ export interface StageLook {
   // Boden
   ground: string
   groundMap: 'grass' | 'sand' | 'sprinkles'
+  // Plattform-Material. Die Seiten tragen eine gemalte Kachel, die Oberseite eine
+  // prozedurale Draufsicht in `platformTop`. Ohne eigene Werte bleibt es beim Wald-Look
+  // (Erde mit Grasnarbe) — am Strand wäre das falsch, dort gehören Sand und Holz hin.
+  platformTile: string
+  platformTopMap: 'grass' | 'sand'
+  platformTop: string
   // Gemaltes Hintergrund-Panorama: Lage der Ebene. Jedes Panorama hat seinen Horizont an
   // einer anderen Stelle — mit den Wald-Werten säße ein anderes Bild schief zum 3D-Boden.
   bgY: number
@@ -109,6 +115,7 @@ export const STAGE: Record<DecorKind, StageLook> = {
     ambient: 0.22, hemiSky: '#cdeaff', hemiGround: '#4d6b3f', hemiIntensity: 0.42,
     sunColor: '#fff2d6', sunIntensity: 2.1,
     ground: '#6fa855', groundMap: 'grass',
+    platformTile: 'art/deco/platform_dirt.webp', platformTopMap: 'grass', platformTop: '#b6e86a',
     bgY: 10, bgHeight: 115, bgFactor: 0.85,
     water: 'river',
     treeArt: [
@@ -129,15 +136,29 @@ export const STAGE: Record<DecorKind, StageLook> = {
     name: THEMES.coast.name,
     // Klare Seeluft: wenig Trübung, damit der Himmel kräftig blau bleibt.
     skyTurbidity: 2, skyRayleigh: 1.1, sunPosition: [70, 50, 55],
-    fog: THEMES.coast.fog, fogNear: 55, fogFar: 145,
+    // Warmer Strand-Dunst statt des blauen THEMES-Werts (#cfeaf7). Der Boden verschwindet
+    // zum Horizont hin in der Nebelfarbe; mit Blau-Weiß entstand direkt unter dem
+    // Panorama ein blasser Streifen — die sichtbare Kante quer durchs Bild. Gemessen:
+    // gemalter Strand rgb(251,222,135) gegen fernen 3D-Sand rgb(211,224,226) — der
+    // Sprung saß fast komplett im Blaukanal. Mit diesem Ton: rgb(238,214,158), nahtlos.
+    fog: '#f2dda8', fogNear: 55, fogFar: 145,
     envPreset: THEMES.coast.envPreset, envIntensity: 0.75,
     ambient: THEMES.coast.ambient, hemiSky: THEMES.coast.hemiSky, hemiGround: THEMES.coast.hemiGround, hemiIntensity: 0.55,
     // Strandlicht ist heller und kälter als Waldlicht, der Sand reflektiert kräftig.
     sunColor: '#fff8e6', sunIntensity: 2.35,
     ground: '#e8cf98', groundMap: 'sand',
-    // Eigene Backdrop-Lage: das Küsten-Panorama ist flacher (2,33 statt ~2,5) und hat
-    // seinen Horizont weiter unten als das Wald-Bild.
-    bgY: 14, bgHeight: 108, bgFactor: 0.85,
+    // Strand-Plattformen: Sand-Draufsicht statt Grasnarbe. Eine grüne Narbe mitten in der
+    // Bucht war der auffälligste Fehler im Bild. Die Seiten-Kachel ist noch die Wald-Erde
+    // — sie wird durch eine gemalte Holzplanken-Kachel ersetzt, sobald das Artwork da ist.
+    platformTile: 'art/deco/platform_dirt.webp', platformTopMap: 'sand', platformTop: '#efd9a4',
+    // Eigene Backdrop-Lage. Entscheidend ist NICHT der Horizont, sondern welcher Teil des
+    // Bildes unten an der Naht zum 3D-Boden sitzt: Der Boden verdeckt das Panorama bis zu
+    // seiner eigenen Horizontlinie (Backdrop-Welt-y ≈ 1,9 bei dieser Kamera). Mit den
+    // alten Werten lag dort das offene MEER — die gemalte Brandung und der goldene Strand
+    // des Bildes blieben dauerhaft verdeckt, und Wasser stieß in einer schnurgeraden Linie
+    // auf Sand. Bild etwas kleiner + höher gerückt: jetzt trifft gemalter Strand auf
+    // 3D-Strand, und oben bleibt trotzdem Himmel im Bild.
+    bgY: 35, bgHeight: 86, bgFactor: 0.85,
     // Kein 3D-Wasser: Meer, Brandung und Boote sind im Panorama gemalt. Eine zusätzliche
     // Wasserfläche würde davor schweben — derselbe Fehler wie früher die Wald-Wasserfälle.
     water: 'none',
@@ -160,6 +181,7 @@ export const STAGE: Record<DecorKind, StageLook> = {
     ambient: THEMES.candy.ambient, hemiSky: THEMES.candy.hemiSky, hemiGround: THEMES.candy.hemiGround, hemiIntensity: 0.6,
     sunColor: '#ffe6f4', sunIntensity: 1.9,
     ground: '#f7bcdd', groundMap: 'sprinkles',
+    platformTile: 'art/deco/platform_dirt.webp', platformTopMap: 'grass', platformTop: '#b6e86a',
     bgY: 10, bgHeight: 115, bgFactor: 0.85,
     water: 'none',
     treeArt: [], deco: [], houseArt: [],
@@ -177,6 +199,7 @@ export const STAGE: Record<DecorKind, StageLook> = {
     ambient: THEMES.volcano.ambient, hemiSky: THEMES.volcano.hemiSky, hemiGround: THEMES.volcano.hemiGround, hemiIntensity: 0.5,
     sunColor: '#ffb070', sunIntensity: 1.8,
     ground: '#5a453f', groundMap: 'sprinkles',
+    platformTile: 'art/deco/platform_dirt.webp', platformTopMap: 'grass', platformTop: '#b6e86a',
     bgY: 10, bgHeight: 115, bgFactor: 0.85,
     water: 'none',
     treeArt: [], deco: [], houseArt: [],
@@ -194,6 +217,7 @@ export const STAGE: Record<DecorKind, StageLook> = {
     ambient: THEMES.ice.ambient, hemiSky: THEMES.ice.hemiSky, hemiGround: THEMES.ice.hemiGround, hemiIntensity: 0.6,
     sunColor: '#eaf6ff', sunIntensity: 2.0,
     ground: '#e6f4ff', groundMap: 'sprinkles',
+    platformTile: 'art/deco/platform_dirt.webp', platformTopMap: 'grass', platformTop: '#b6e86a',
     bgY: 10, bgHeight: 115, bgFactor: 0.85,
     water: 'none',
     treeArt: [], deco: [], houseArt: [],
@@ -211,6 +235,7 @@ export const STAGE: Record<DecorKind, StageLook> = {
     ambient: THEMES.city.ambient, hemiSky: THEMES.city.hemiSky, hemiGround: THEMES.city.hemiGround, hemiIntensity: 0.55,
     sunColor: '#9a8cff', sunIntensity: 1.2,
     ground: '#241a4a', groundMap: 'sprinkles',
+    platformTile: 'art/deco/platform_dirt.webp', platformTopMap: 'grass', platformTop: '#b6e86a',
     bgY: 10, bgHeight: 115, bgFactor: 0.85,
     water: 'none',
     treeArt: [], deco: [], houseArt: [],
