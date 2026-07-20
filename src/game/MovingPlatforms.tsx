@@ -5,36 +5,26 @@ import * as THREE from 'three'
 import { asset } from '../utils/asset'
 import { makeGrassTexture } from '../render/paint'
 import { player } from './playerState'
-import { PW, type Platform } from './physics'
+import type { Platform } from './physics'
+import { stepMovers } from './movers'
 import type { MoverDef } from './level'
 
 // Bewegliche Plattformen — ohne jeden Eingriff in die Physik.
 //
 // Wie es funktioniert: `buildMovers` erzeugt aus den Definitionen echte `Platform`-
-// Objekte. Genau DIESE Objekte landen im Array, das `stepPlayer` bekommt. Hier wird
-// ihr x/y je Frame mutiert; weil `stepPlayer` die Werte live liest, trägt die
-// bestehende Landungsprüfung die Plattform automatisch mit.
+// Objekte. Genau DIESE Objekte landen im Array, das `stepPlayer` bekommt. Ihr x/y wird
+// je Frame mutiert; weil `stepPlayer` die Werte live liest, trägt die bestehende
+// Landungsprüfung die Plattform automatisch mit.
 //
 // WICHTIG ist die Reihenfolge: dieses useFrame läuft mit Priorität -2, also VOR dem
 // Physik-Schritt des Spielers (Priorität 0). Sonst würde der Spieler eine Plattform
 // sehen, die erst danach wegfährt — er würde durchfallen.
+//
+// Die Rechnung selbst (Pendel + Mitnahme) steht in `movers.ts` — dort ohne three und
+// deshalb in Node prüfbar (`scripts/test-movers.mjs`). Hier bleibt nur die Darstellung.
 
 const DEPTH = 2.6
 const OVERHANG = 0.45 // wie bei den festen Plattformen: Erdkörper reicht unter die Steh-Linie
-
-// Weltposition eines Movers zum Zeitpunkt t.
-function offsetAt(d: MoverDef, t: number): number {
-  return Math.sin(t * d.speed + (d.phase ?? 0)) * d.range
-}
-
-// Erzeugt die lebenden Plattform-Objekte (Startposition = Position bei t = 0,
-// damit im ersten Frame nichts springt).
-export function buildMovers(defs: MoverDef[]): Platform[] {
-  return defs.map((d) => {
-    const off = offsetAt(d, 0)
-    return { x: d.x + (d.axis === 'x' ? off : 0), y: d.y + (d.axis === 'y' ? off : 0), w: d.w, h: d.h }
-  })
-}
 
 export function MovingPlatforms({ defs, live }: { defs: MoverDef[]; live: Platform[] }) {
   const groups = useRef<(THREE.Group | null)[]>([])
@@ -68,33 +58,13 @@ export function MovingPlatforms({ defs, live }: { defs: MoverDef[]; live: Platfo
   }, [])
 
   useFrame(({ clock }) => {
-    const t = clock.elapsedTime
+    // Pendel-Bewegung + Spieler mittragen (geprüft in scripts/test-movers.mjs)
+    stepMovers(defs, live, player, clock.elapsedTime)
+    // Darstellung nachziehen: Gruppen-Ursprung sitzt auf der Steh-Linie.
     for (let i = 0; i < defs.length; i++) {
-      const d = defs[i]
       const p = live[i]
-      if (!p) continue
-
-      const prevX = p.x
-      const prevY = p.y
-      const off = offsetAt(d, t)
-      if (d.axis === 'x') p.x = d.x + off
-      else p.y = d.y + off
-
-      // Spieler mittragen: Steht er (Stand aus dem letzten Physik-Schritt) oben auf
-      // dieser Plattform, wandert er um dasselbe Delta mit.
-      const top = prevY + p.h
-      if (
-        player.onGround &&
-        Math.abs(player.y - top) < 0.14 &&
-        player.x + PW > prevX &&
-        player.x - PW < prevX + p.w
-      ) {
-        player.x += p.x - prevX
-        player.y += p.y - prevY
-      }
-
       const g = groups.current[i]
-      if (g) g.position.set(p.x + p.w / 2, p.y + p.h, 0)
+      if (p && g) g.position.set(p.x + p.w / 2, p.y + p.h, 0)
     }
   }, -2)
 
