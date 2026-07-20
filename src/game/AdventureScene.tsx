@@ -10,9 +10,8 @@ import { Backdrop } from '../render/Parallax3D'
 import { Life } from '../render/Life'
 import { Fx } from '../render/Fx'
 import { Water } from '../render/Water'
-import { makeGrassTexture } from '../render/paint'
+import { makeGrassTexture, makeSandTexture, makeSprinkleTexture } from '../render/paint'
 import { stageFor, type StageLook } from '../world/stage'
-import * as THREE from 'three'
 import { Player } from './Player'
 import { Platforms } from './Platforms'
 import { MovingPlatforms } from './MovingPlatforms'
@@ -33,64 +32,8 @@ const EMPTY_MOVERS: MoverDef[] = []
 // + Environment für runde Formen, plastische Plattformen, 3D-Tiefen-Wald mit Nebel,
 // Schatten für Erdung, sanftes Bloom. Spiel-Logik unverändert.
 
-// Streusel-Boden für die Zucker-Welt: helle Grundfläche mit bunten Sprenkeln. Rein
-// prozedural (keine Datei) und einmal erzeugt — im Gras-Look würde eine rosa Tönung auf
-// der grünen Gras-Textur nur schlammig aussehen.
-function makeSprinkleTexture(): THREE.CanvasTexture {
-  const c = document.createElement('canvas')
-  c.width = 256
-  c.height = 256
-  const ctx = c.getContext('2d')!
-  ctx.fillStyle = '#ffffff'
-  ctx.fillRect(0, 0, 256, 256)
-  let s = 4711
-  const r = () => ((s = (s * 1664525 + 1013904223) >>> 0), s / 0xffffffff)
-  const cols = ['#ffd6ea', '#ffe9a8', '#c9f0ff', '#ffc2d8', '#e0d0ff']
-  for (let i = 0; i < 220; i++) {
-    ctx.save()
-    ctx.translate(r() * 256, r() * 256)
-    ctx.rotate(r() * Math.PI)
-    ctx.fillStyle = cols[(r() * cols.length) | 0]
-    ctx.fillRect(-5, -1.6, 10, 3.2)
-    ctx.restore()
-  }
-  const t = new THREE.CanvasTexture(c)
-  t.colorSpace = THREE.SRGBColorSpace
-  t.wrapS = THREE.RepeatWrapping
-  t.wrapT = THREE.RepeatWrapping
-  return t
-}
-
-// Feiner Strandsand: warmer Grundton mit Körnung und ein paar hellen Muschelsplittern.
-// Eine eingefärbte Gras-Textur wäre hier schlammig geworden (grün × sandfarben).
-function makeSandTexture(): THREE.CanvasTexture {
-  const c = document.createElement('canvas')
-  c.width = 256
-  c.height = 256
-  const ctx = c.getContext('2d')!
-  ctx.fillStyle = '#f0dcae'
-  ctx.fillRect(0, 0, 256, 256)
-  let s = 9182
-  const r = () => ((s = (s * 1664525 + 1013904223) >>> 0), s / 0xffffffff)
-  // Körnung
-  for (let i = 0; i < 2600; i++) {
-    const v = r()
-    ctx.fillStyle = v > 0.5 ? 'rgba(214,182,132,0.55)' : 'rgba(255,246,220,0.5)'
-    ctx.fillRect(r() * 256, r() * 256, 1.6, 1.6)
-  }
-  // vereinzelte Muschelsplitter
-  for (let i = 0; i < 26; i++) {
-    ctx.fillStyle = 'rgba(255,252,244,0.75)'
-    ctx.beginPath()
-    ctx.ellipse(r() * 256, r() * 256, 2.2 + r() * 1.6, 1.2 + r(), r() * Math.PI, 0, Math.PI * 2)
-    ctx.fill()
-  }
-  const t = new THREE.CanvasTexture(c)
-  t.colorSpace = THREE.SRGBColorSpace
-  t.wrapS = THREE.RepeatWrapping
-  t.wrapT = THREE.RepeatWrapping
-  return t
-}
+// Die Boden-Texturen (Gras/Sand/Streusel) liegen in `render/paint.ts` — dieselben
+// Funktionen bauen jetzt auch die Oberseite der Plattformen.
 
 function Ground({ minX, maxX, look }: { minX: number; maxX: number; look: StageLook }) {
   const tex = useMemo(() => {
@@ -195,8 +138,8 @@ export function AdventureScene({ level }: { level: LevelDef }) {
       <Life minX={level.startX} maxX={level.goalX} />
 
       <Suspense fallback={null}>
-        <Platforms platforms={level.platforms} />
-        <MovingPlatforms defs={movers} live={liveMovers} />
+        <Platforms platforms={level.platforms} look={look} />
+        <MovingPlatforms defs={movers} live={liveMovers} look={look} />
       </Suspense>
       <Suspense fallback={null}>
         <Coins coins={level.coins} />

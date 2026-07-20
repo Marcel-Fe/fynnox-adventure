@@ -2,7 +2,8 @@ import { useMemo } from 'react'
 import { useTexture } from '@react-three/drei'
 import * as THREE from 'three'
 import { asset } from '../utils/asset'
-import { makeGrassTexture } from '../render/paint'
+import { makeGrassTexture, makeSandTexture } from '../render/paint'
+import type { StageLook } from '../world/stage'
 import type { Platform } from './physics'
 
 // Plattformen mit gemalter Erd-/Grasnarbe-Kachel (Nutzer-Artwork).
@@ -21,8 +22,11 @@ import type { Platform } from './physics'
 const DEPTH = 3.2
 const OVERHANG = 0.5 // wie weit der Erdkörper unter die Steh-Linie reicht
 
-export function Platforms({ platforms }: { platforms: Platform[] }) {
-  const tile = useTexture(asset('art/deco/platform_dirt.webp'))
+export function Platforms({ platforms, look }: { platforms: Platform[]; look: StageLook }) {
+  // Kachel und Deckfarbe kommen aus dem Welt-Look: Wald = Erde mit Grasnarbe,
+  // Küste = Sand. Vorher war beides fest verdrahtet — am Strand lag dadurch eine
+  // grüne Grasnarbe mitten in der Bucht.
+  const tile = useTexture(asset(look.platformTile))
 
   // Je Plattform-Maß eine eigene Textur-Instanz: `repeat` hängt am Textur-Objekt, nicht
   // am Material. Klone teilen das Bild im Speicher, kosten also kaum etwas.
@@ -43,14 +47,14 @@ export function Platforms({ platforms }: { platforms: Platform[] }) {
     return m
   }, [tile, platforms])
 
-  // Oberseite: Draufsicht auf Gras. Die Seitenkachel taugt dafür nicht — sie zeigt
-  // Grashalme von der Seite.
+  // Oberseite: Draufsicht (Gras oder Sand). Die Seitenkachel taugt dafür nicht — sie
+  // zeigt die Halme bzw. die Erdschicht von der Seite.
   const topTex = useMemo(() => {
-    const t = makeGrassTexture()
+    const t = look.platformTopMap === 'sand' ? makeSandTexture() : makeGrassTexture()
     t.repeat.set(4, 3)
     t.anisotropy = 4
     return t
-  }, [])
+  }, [look.platformTopMap])
 
   return (
     <>
@@ -68,7 +72,7 @@ export function Platforms({ platforms }: { platforms: Platform[] }) {
             {/* Reihenfolge der BoxGeometry-Gruppen: +x, -x, +y, -y, +z, -z */}
             <meshStandardMaterial attach="material-0" map={side} roughness={0.92} />
             <meshStandardMaterial attach="material-1" map={side} roughness={0.92} />
-            <meshStandardMaterial attach="material-2" map={topTex} color="#b6e86a" roughness={0.85} />
+            <meshStandardMaterial attach="material-2" map={topTex} color={look.platformTop} roughness={0.85} />
             <meshStandardMaterial attach="material-3" color="#5d3f22" roughness={0.95} />
             <meshStandardMaterial attach="material-4" map={side} roughness={0.92} />
             <meshStandardMaterial attach="material-5" map={side} roughness={0.92} />

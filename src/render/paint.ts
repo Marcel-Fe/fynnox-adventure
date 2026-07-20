@@ -253,6 +253,52 @@ export function makeGrassTexture(): THREE.CanvasTexture {
   return t
 }
 
+// Feiner Strandsand (Aufsicht): warmer Grundton mit Körnung und ein paar hellen
+// Muschelsplittern. Eine eingefärbte Gras-Textur wäre hier schlammig geworden
+// (grün × sandfarben). Dient dem Küsten-Boden UND der Oberseite der Strand-Plattformen.
+export function makeSandTexture(): THREE.CanvasTexture {
+  const [c, ctx] = makeCanvas(256, 256)
+  ctx.fillStyle = '#f0dcae'
+  ctx.fillRect(0, 0, 256, 256)
+  const r = rng(9182)
+  for (let i = 0; i < 2600; i++) {
+    const v = r()
+    ctx.fillStyle = v > 0.5 ? 'rgba(214,182,132,0.55)' : 'rgba(255,246,220,0.5)'
+    ctx.fillRect(r() * 256, r() * 256, 1.6, 1.6)
+  }
+  for (let i = 0; i < 26; i++) {
+    ctx.fillStyle = 'rgba(255,252,244,0.75)'
+    ctx.beginPath()
+    ctx.ellipse(r() * 256, r() * 256, 2.2 + r() * 1.6, 1.2 + r(), r() * Math.PI, 0, Math.PI * 2)
+    ctx.fill()
+  }
+  const t = toTexture(c, true)
+  t.wrapS = THREE.RepeatWrapping
+  t.wrapT = THREE.RepeatWrapping
+  return t
+}
+
+// Streusel-Boden für die Zucker-Welt: helle Grundfläche mit bunten Sprenkeln.
+export function makeSprinkleTexture(): THREE.CanvasTexture {
+  const [c, ctx] = makeCanvas(256, 256)
+  ctx.fillStyle = '#ffffff'
+  ctx.fillRect(0, 0, 256, 256)
+  const r = rng(4711)
+  const cols = ['#ffd6ea', '#ffe9a8', '#c9f0ff', '#ffc2d8', '#e0d0ff']
+  for (let i = 0; i < 220; i++) {
+    ctx.save()
+    ctx.translate(r() * 256, r() * 256)
+    ctx.rotate(r() * Math.PI)
+    ctx.fillStyle = cols[(r() * cols.length) | 0]
+    ctx.fillRect(-5, -1.6, 10, 3.2)
+    ctx.restore()
+  }
+  const t = toTexture(c, true)
+  t.wrapS = THREE.RepeatWrapping
+  t.wrapT = THREE.RepeatWrapping
+  return t
+}
+
 // Gemaltes Gras-Plattform-Tile (Erde + Grasnarbe oben), nahtlos horizontal kachelbar.
 export function makePlatformTexture(): THREE.CanvasTexture {
   const [c, ctx] = makeCanvas(256, 192)

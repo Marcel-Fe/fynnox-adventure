@@ -3,7 +3,8 @@ import { useFrame } from '@react-three/fiber'
 import { useTexture } from '@react-three/drei'
 import * as THREE from 'three'
 import { asset } from '../utils/asset'
-import { makeGrassTexture } from '../render/paint'
+import { makeGrassTexture, makeSandTexture } from '../render/paint'
+import type { StageLook } from '../world/stage'
 import { player } from './playerState'
 import type { Platform } from './physics'
 import { stepMovers } from './movers'
@@ -26,13 +27,13 @@ import type { MoverDef } from './level'
 const DEPTH = 2.6
 const OVERHANG = 0.45 // wie bei den festen Plattformen: Erdkörper reicht unter die Steh-Linie
 
-export function MovingPlatforms({ defs, live }: { defs: MoverDef[]; live: Platform[] }) {
+export function MovingPlatforms({ defs, live, look }: { defs: MoverDef[]; live: Platform[]; look: StageLook }) {
   const groups = useRef<(THREE.Group | null)[]>([])
 
-  // Gleiche gemalte Kachel wie die festen Plattformen — sonst fällt der Mover als
-  // einziges Volltonfarben-Objekt aus dem Bild. Erkennbar bleibt er durch seine
+  // Gleiches Material wie die festen Plattformen der Welt — sonst fällt der Mover als
+  // einziges Fremdkörper-Objekt aus dem Bild. Erkennbar bleibt er durch seine
   // Bewegung und die Metallbeschläge an den Enden.
-  const tile = useTexture(asset('art/deco/platform_dirt.webp'))
+  const tile = useTexture(asset(look.platformTile))
   const sideTex = useMemo(() => {
     const m = new Map<string, THREE.Texture>()
     for (const d of defs) {
@@ -51,11 +52,11 @@ export function MovingPlatforms({ defs, live }: { defs: MoverDef[]; live: Platfo
   }, [tile, defs])
 
   const topTex = useMemo(() => {
-    const t = makeGrassTexture()
+    const t = look.platformTopMap === 'sand' ? makeSandTexture() : makeGrassTexture()
     t.repeat.set(3, 2)
     t.anisotropy = 4
     return t
-  }, [])
+  }, [look.platformTopMap])
 
   useFrame(({ clock }) => {
     // Pendel-Bewegung + Spieler mittragen (geprüft in scripts/test-movers.mjs)
@@ -85,7 +86,7 @@ export function MovingPlatforms({ defs, live }: { defs: MoverDef[]; live: Platfo
               <boxGeometry args={[d.w, visH, DEPTH]} />
               <meshStandardMaterial attach="material-0" map={side} roughness={0.92} />
               <meshStandardMaterial attach="material-1" map={side} roughness={0.92} />
-              <meshStandardMaterial attach="material-2" map={topTex} color="#b6e86a" roughness={0.85} />
+              <meshStandardMaterial attach="material-2" map={topTex} color={look.platformTop} roughness={0.85} />
               <meshStandardMaterial attach="material-3" color="#5d3f22" roughness={0.95} />
               <meshStandardMaterial attach="material-4" map={side} roughness={0.92} />
               <meshStandardMaterial attach="material-5" map={side} roughness={0.92} />
