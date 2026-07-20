@@ -48,12 +48,18 @@ export interface StageLook {
   // Boden
   ground: string
   groundMap: 'grass' | 'sand' | 'sprinkles'
-  // Plattform-Material. Die Seiten tragen eine gemalte Kachel, die Oberseite eine
-  // prozedurale Draufsicht in `platformTop`. Ohne eigene Werte bleibt es beim Wald-Look
-  // (Erde mit Grasnarbe) — am Strand wäre das falsch, dort gehören Sand und Holz hin.
+  // Plattform-Material. Die Seiten tragen eine gemalte Kachel; die Oberseite entweder
+  // eine prozedurale Draufsicht ('grass'/'sand') oder dieselbe Kachel ('tile' — richtig
+  // bei einem Holzsteg, dessen Deck aus denselben Bohlen besteht). `platformTop` tönt die
+  // Oberseite. Ohne eigene Werte bleibt es beim Wald-Look (Erde mit Grasnarbe).
   platformTile: string
-  platformTopMap: 'grass' | 'sand'
+  platformTopMap: 'grass' | 'sand' | 'tile'
   platformTop: string
+  // Kantenlänge in Welt-Einheiten, die EINE Kachel abdeckt (Fynnox ist 2,6 hoch).
+  // 0 = Wald-Verhalten: die Kachel füllt die Plattform-Höhe genau einmal aus. Das passt
+  // für die Erd-Kachel, deren Grasnarbe oben sitzen MUSS. Bei Holzbohlen wäre es falsch:
+  // die Kachel zeigt elf Bretter, über 1,1 Einheiten gequetscht wären das 10-cm-Latten.
+  platformTileWorld: number
   // Gemaltes Hintergrund-Panorama: Lage der Ebene. Jedes Panorama hat seinen Horizont an
   // einer anderen Stelle — mit den Wald-Werten säße ein anderes Bild schief zum 3D-Boden.
   bgY: number
@@ -115,7 +121,7 @@ export const STAGE: Record<DecorKind, StageLook> = {
     ambient: 0.22, hemiSky: '#cdeaff', hemiGround: '#4d6b3f', hemiIntensity: 0.42,
     sunColor: '#fff2d6', sunIntensity: 2.1,
     ground: '#6fa855', groundMap: 'grass',
-    platformTile: 'art/deco/platform_dirt.webp', platformTopMap: 'grass', platformTop: '#b6e86a',
+    platformTile: 'art/deco/platform_dirt.webp', platformTopMap: 'grass', platformTop: '#b6e86a', platformTileWorld: 0,
     bgY: 10, bgHeight: 115, bgFactor: 0.85,
     water: 'river',
     treeArt: [
@@ -147,10 +153,10 @@ export const STAGE: Record<DecorKind, StageLook> = {
     // Strandlicht ist heller und kälter als Waldlicht, der Sand reflektiert kräftig.
     sunColor: '#fff8e6', sunIntensity: 2.35,
     ground: '#e8cf98', groundMap: 'sand',
-    // Strand-Plattformen: Sand-Draufsicht statt Grasnarbe. Eine grüne Narbe mitten in der
-    // Bucht war der auffälligste Fehler im Bild. Die Seiten-Kachel ist noch die Wald-Erde
-    // — sie wird durch eine gemalte Holzplanken-Kachel ersetzt, sobald das Artwork da ist.
-    platformTile: 'art/deco/platform_dirt.webp', platformTopMap: 'sand', platformTop: '#efd9a4',
+    // Strand-Plattformen sind Steg-Stücke aus gemalten Holzbohlen (Nutzer-Artwork,
+    // Nahtmessung 26,4/441 → kachelt sauber). Deck aus denselben Bohlen, leicht von der
+    // Sonne gebleicht. Vorher trug die Bucht die Wald-Kachel mit grüner Grasnarbe.
+    platformTile: 'art/deco/platform_planks.webp', platformTopMap: 'tile', platformTop: '#ffeed8', platformTileWorld: 3,
     // Eigene Backdrop-Lage. Entscheidend ist NICHT der Horizont, sondern welcher Teil des
     // Bildes unten an der Naht zum 3D-Boden sitzt: Der Boden verdeckt das Panorama bis zu
     // seiner eigenen Horizontlinie (Backdrop-Welt-y ≈ 1,9 bei dieser Kamera). Mit den
@@ -181,7 +187,7 @@ export const STAGE: Record<DecorKind, StageLook> = {
     ambient: THEMES.candy.ambient, hemiSky: THEMES.candy.hemiSky, hemiGround: THEMES.candy.hemiGround, hemiIntensity: 0.6,
     sunColor: '#ffe6f4', sunIntensity: 1.9,
     ground: '#f7bcdd', groundMap: 'sprinkles',
-    platformTile: 'art/deco/platform_dirt.webp', platformTopMap: 'grass', platformTop: '#b6e86a',
+    platformTile: 'art/deco/platform_dirt.webp', platformTopMap: 'grass', platformTop: '#b6e86a', platformTileWorld: 0,
     bgY: 10, bgHeight: 115, bgFactor: 0.85,
     water: 'none',
     treeArt: [], deco: [], houseArt: [],
@@ -199,7 +205,7 @@ export const STAGE: Record<DecorKind, StageLook> = {
     ambient: THEMES.volcano.ambient, hemiSky: THEMES.volcano.hemiSky, hemiGround: THEMES.volcano.hemiGround, hemiIntensity: 0.5,
     sunColor: '#ffb070', sunIntensity: 1.8,
     ground: '#5a453f', groundMap: 'sprinkles',
-    platformTile: 'art/deco/platform_dirt.webp', platformTopMap: 'grass', platformTop: '#b6e86a',
+    platformTile: 'art/deco/platform_dirt.webp', platformTopMap: 'grass', platformTop: '#b6e86a', platformTileWorld: 0,
     bgY: 10, bgHeight: 115, bgFactor: 0.85,
     water: 'none',
     treeArt: [], deco: [], houseArt: [],
@@ -217,7 +223,7 @@ export const STAGE: Record<DecorKind, StageLook> = {
     ambient: THEMES.ice.ambient, hemiSky: THEMES.ice.hemiSky, hemiGround: THEMES.ice.hemiGround, hemiIntensity: 0.6,
     sunColor: '#eaf6ff', sunIntensity: 2.0,
     ground: '#e6f4ff', groundMap: 'sprinkles',
-    platformTile: 'art/deco/platform_dirt.webp', platformTopMap: 'grass', platformTop: '#b6e86a',
+    platformTile: 'art/deco/platform_dirt.webp', platformTopMap: 'grass', platformTop: '#b6e86a', platformTileWorld: 0,
     bgY: 10, bgHeight: 115, bgFactor: 0.85,
     water: 'none',
     treeArt: [], deco: [], houseArt: [],
@@ -235,7 +241,7 @@ export const STAGE: Record<DecorKind, StageLook> = {
     ambient: THEMES.city.ambient, hemiSky: THEMES.city.hemiSky, hemiGround: THEMES.city.hemiGround, hemiIntensity: 0.55,
     sunColor: '#9a8cff', sunIntensity: 1.2,
     ground: '#241a4a', groundMap: 'sprinkles',
-    platformTile: 'art/deco/platform_dirt.webp', platformTopMap: 'grass', platformTop: '#b6e86a',
+    platformTile: 'art/deco/platform_dirt.webp', platformTopMap: 'grass', platformTop: '#b6e86a', platformTileWorld: 0,
     bgY: 10, bgHeight: 115, bgFactor: 0.85,
     water: 'none',
     treeArt: [], deco: [], houseArt: [],

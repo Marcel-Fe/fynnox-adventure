@@ -34,24 +34,37 @@ export function MovingPlatforms({ defs, live, look }: { defs: MoverDef[]; live: 
   // einziges Fremdkörper-Objekt aus dem Bild. Erkennbar bleibt er durch seine
   // Bewegung und die Metallbeschläge an den Enden.
   const tile = useTexture(asset(look.platformTile))
-  const sideTex = useMemo(() => {
-    const m = new Map<string, THREE.Texture>()
+  // Wie bei den festen Plattformen: Seite und Deck zusammen, damit die Bohlen auf beiden
+  // Flächen gleich groß sind. `platformTileWorld` = Kantenlänge einer Kachel in Welt-
+  // Einheiten; 0 = Wald-Verhalten (Kachel füllt die Höhe genau einmal, Grasnarbe oben).
+  const tex = useMemo(() => {
+    const m = new Map<string, { side: THREE.Texture; top: THREE.Texture | null }>()
     for (const d of defs) {
       const key = `${d.w}:${d.h}`
       if (m.has(key)) continue
-      const t = tile.clone()
-      t.needsUpdate = true
-      t.wrapS = THREE.RepeatWrapping
-      t.wrapT = THREE.ClampToEdgeWrapping
-      t.colorSpace = THREE.SRGBColorSpace
-      t.anisotropy = 4
-      t.repeat.set(Math.max(1, Math.round(d.w / (d.h + OVERHANG))), 1)
-      m.set(key, t)
+      const visH = d.h + OVERHANG
+      const tw = look.platformTileWorld || visH
+      const prep = (t: THREE.Texture, rx: number, ry: number, clampY: boolean) => {
+        t.needsUpdate = true
+        t.wrapS = THREE.RepeatWrapping
+        t.wrapT = clampY ? THREE.ClampToEdgeWrapping : THREE.RepeatWrapping
+        t.colorSpace = THREE.SRGBColorSpace
+        t.anisotropy = 8
+        t.repeat.set(rx, ry)
+        return t
+      }
+      const side = prep(tile.clone(), Math.max(1, Math.round(d.w / tw)), visH / tw, tw === visH)
+      const top =
+        look.platformTopMap === 'tile'
+          ? prep(tile.clone(), Math.max(1, Math.round(d.w / tw)), DEPTH / tw, false)
+          : null
+      m.set(key, { side, top })
     }
     return m
-  }, [tile, defs])
+  }, [tile, defs, look.platformTileWorld, look.platformTopMap])
 
   const topTex = useMemo(() => {
+    if (look.platformTopMap === 'tile') return null
     const t = look.platformTopMap === 'sand' ? makeSandTexture() : makeGrassTexture()
     t.repeat.set(3, 2)
     t.anisotropy = 4
@@ -73,7 +86,9 @@ export function MovingPlatforms({ defs, live, look }: { defs: MoverDef[]; live: 
     <>
       {defs.map((d, i) => {
         const visH = d.h + OVERHANG
-        const side = sideTex.get(`${d.w}:${d.h}`)
+        const t = tex.get(`${d.w}:${d.h}`)
+        const side = t?.side
+        const top = t?.top ?? topTex
         return (
           // Gruppen-Ursprung sitzt auf der STEH-LINIE, der Körper hängt darunter —
           // so kann das useFrame oben einfach die Oberkante setzen.
@@ -86,7 +101,7 @@ export function MovingPlatforms({ defs, live, look }: { defs: MoverDef[]; live: 
               <boxGeometry args={[d.w, visH, DEPTH]} />
               <meshStandardMaterial attach="material-0" map={side} roughness={0.92} />
               <meshStandardMaterial attach="material-1" map={side} roughness={0.92} />
-              <meshStandardMaterial attach="material-2" map={topTex} color={look.platformTop} roughness={0.85} />
+              <meshStandardMaterial attach="material-2" map={top} color={look.platformTop} roughness={0.85} />
               <meshStandardMaterial attach="material-3" color="#5d3f22" roughness={0.95} />
               <meshStandardMaterial attach="material-4" map={side} roughness={0.92} />
               <meshStandardMaterial attach="material-5" map={side} roughness={0.92} />

@@ -30,26 +30,42 @@ export function Platforms({ platforms, look }: { platforms: Platform[]; look: St
 
   // Je Plattform-Maß eine eigene Textur-Instanz: `repeat` hängt am Textur-Objekt, nicht
   // am Material. Klone teilen das Bild im Speicher, kosten also kaum etwas.
-  const sideTex = useMemo(() => {
-    const m = new Map<string, THREE.Texture>()
+  // Seite UND Deck entstehen zusammen, damit die Bohlen auf beiden Flächen gleich groß
+  // sind — sonst sieht man der Plattform an, dass sie aus zwei Materialien besteht.
+  const tex = useMemo(() => {
+    const m = new Map<string, { side: THREE.Texture; top: THREE.Texture | null }>()
     for (const f of platforms) {
       const key = `${f.w}:${f.h}`
       if (m.has(key)) continue
-      const t = tile.clone()
-      t.needsUpdate = true
-      t.wrapS = THREE.RepeatWrapping
-      t.wrapT = THREE.ClampToEdgeWrapping
-      t.colorSpace = THREE.SRGBColorSpace
-      t.anisotropy = 4
-      t.repeat.set(Math.max(1, Math.round(f.w / (f.h + OVERHANG))), 1)
-      m.set(key, t)
+      const visH = f.h + OVERHANG
+      // `platformTileWorld` = Kantenlänge einer Kachel in Welt-Einheiten. 0 heißt
+      // „Kachel füllt die Plattform-Höhe genau einmal" (Wald: die Grasnarbe MUSS oben
+      // sitzen, deshalb dort exakt eine Lage und ClampToEdge).
+      const tw = look.platformTileWorld || visH
+      const prep = (t: THREE.Texture, rx: number, ry: number, clampY: boolean) => {
+        t.needsUpdate = true
+        t.wrapS = THREE.RepeatWrapping
+        t.wrapT = clampY ? THREE.ClampToEdgeWrapping : THREE.RepeatWrapping
+        t.colorSpace = THREE.SRGBColorSpace
+        t.anisotropy = 8
+        t.repeat.set(rx, ry)
+        return t
+      }
+      const side = prep(tile.clone(), Math.max(1, Math.round(f.w / tw)), visH / tw, tw === visH)
+      const top =
+        look.platformTopMap === 'tile'
+          ? prep(tile.clone(), Math.max(1, Math.round(f.w / tw)), DEPTH / tw, false)
+          : null
+      m.set(key, { side, top })
     }
     return m
-  }, [tile, platforms])
+  }, [tile, platforms, look.platformTileWorld, look.platformTopMap])
 
-  // Oberseite: Draufsicht (Gras oder Sand). Die Seitenkachel taugt dafür nicht — sie
-  // zeigt die Halme bzw. die Erdschicht von der Seite.
+  // Oberseite bei Gras/Sand: prozedurale Draufsicht. Die Seitenkachel taugt dafür nicht —
+  // sie zeigt Halme bzw. die Erdschicht von der Seite. Beim Holzsteg dagegen IST das Deck
+  // aus denselben Bohlen; dort kommt die Kachel oben aus `tex` (Größe passend zur Seite).
   const topTex = useMemo(() => {
+    if (look.platformTopMap === 'tile') return null
     const t = look.platformTopMap === 'sand' ? makeSandTexture() : makeGrassTexture()
     t.repeat.set(4, 3)
     t.anisotropy = 4
@@ -60,7 +76,9 @@ export function Platforms({ platforms, look }: { platforms: Platform[]; look: St
     <>
       {platforms.map((f, i) => {
         const visH = f.h + OVERHANG
-        const side = sideTex.get(`${f.w}:${f.h}`)
+        const t = tex.get(`${f.w}:${f.h}`)
+        const side = t?.side
+        const top = t?.top ?? topTex
         return (
           <mesh
             key={i}
@@ -72,7 +90,7 @@ export function Platforms({ platforms, look }: { platforms: Platform[]; look: St
             {/* Reihenfolge der BoxGeometry-Gruppen: +x, -x, +y, -y, +z, -z */}
             <meshStandardMaterial attach="material-0" map={side} roughness={0.92} />
             <meshStandardMaterial attach="material-1" map={side} roughness={0.92} />
-            <meshStandardMaterial attach="material-2" map={topTex} color={look.platformTop} roughness={0.85} />
+            <meshStandardMaterial attach="material-2" map={top} color={look.platformTop} roughness={0.85} />
             <meshStandardMaterial attach="material-3" color="#5d3f22" roughness={0.95} />
             <meshStandardMaterial attach="material-4" map={side} roughness={0.92} />
             <meshStandardMaterial attach="material-5" map={side} roughness={0.92} />
