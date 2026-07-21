@@ -5,6 +5,7 @@ import { Hud } from './ui/Hud'
 import { TouchControls } from './ui/TouchControls'
 import { MainMenu } from './ui/MainMenu'
 import { SplashScreen } from './ui/SplashScreen'
+import { LoadingOverlay } from './ui/LoadingOverlay'
 import { ResultScreen } from './ui/ResultScreen'
 import { StoryPanel } from './ui/StoryPanel'
 import { RotateHint } from './ui/RotateHint'
@@ -22,13 +23,22 @@ import { initMusic } from './audio/music'
 function CameraFollow() {
   const { camera } = useThree()
   const lead = useRef(0)
+  // Beim ersten Frame eines Laufs hart auf den Spieler schnappen statt weich vom
+  // Vorzustand zu gleiten. Der Canvas remountet je Lauf (key={runId}) → dieser Ref ist
+  // dann frisch. Ohne den Snap schwenkte die Kamera zu Beginn sichtbar auf Fynnox zu.
+  const snapped = useRef(false)
   useFrame((_, delta) => {
     const dt = Math.min(delta, 0.05)
     // Vorausschau in Laufrichtung (weich nachgeführt, damit es nicht ruckt)
     const targetLead = Math.max(-3, Math.min(3, player.vx * 0.28))
     lead.current += (targetLead - lead.current) * Math.min(1, dt * 3)
 
-    camera.position.x += (player.x + lead.current - camera.position.x) * Math.min(1, dt * 4)
+    if (!snapped.current) {
+      camera.position.x = player.x + lead.current
+      snapped.current = true
+    } else {
+      camera.position.x += (player.x + lead.current - camera.position.x) * Math.min(1, dt * 4)
+    }
 
     // Rüttler abklingen lassen
     shake.amount *= Math.max(0, 1 - dt * 6)
@@ -96,6 +106,7 @@ export default function App() {
   return (
     <>
       <GameView />
+      <LoadingOverlay />
       <MuteButton />
       <RotateHint />
     </>

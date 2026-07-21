@@ -1,7 +1,8 @@
 import { create } from 'zustand'
 import { emptySave, loadSave, writeSave, type SaveData } from '../save/save'
 import { storyFor, type StoryKind } from '../data/story'
-import { nextLevelId } from '../game/levels'
+import { nextLevelId, getLevel } from '../game/levels'
+import { resetPlayer } from '../game/playerState'
 
 export type Screen = 'menu' | 'play' | 'result' | 'story'
 
@@ -65,8 +66,14 @@ export const useGameStore = create<GameState>((set, get) => ({
   save: loadSave(),
   pendingStory: null,
 
-  start: (levelId) =>
-    set((s) => ({ screen: 'play', levelId, coins: 0, gems: 0, stars: 0, questDone: false, hasKey: false, chestOpen: false, talked: {}, result: null, pendingStory: null, runId: s.runId + 1 })),
+  start: (levelId) => {
+    // Spieler SOFORT auf den Startpunkt setzen — nicht erst in Player.tsx. Player hängt
+    // hinter dem GLB-Suspense: solange das 2,4-MB-Modell lädt, stünde der Spieler sonst
+    // bei x=0, die Kamera zielte daneben und schwenkte danach sichtbar nach. Ergebnis war
+    // ein „leerer" Start ohne zentrierten Fynnox. Hier läuft es synchron beim Level-Start.
+    resetPlayer(getLevel(levelId).startX)
+    set((s) => ({ screen: 'play', levelId, coins: 0, gems: 0, stars: 0, questDone: false, hasKey: false, chestOpen: false, talked: {}, result: null, pendingStory: null, runId: s.runId + 1 }))
+  },
 
   // Einstieg über das Menü: erst das Story-Kapitel (falls es eines gibt und es noch
   // nicht gezeigt wurde), dann das Level. Beim Wiederholen kommt kein Panel mehr.
