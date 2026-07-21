@@ -100,15 +100,19 @@ const FOREST_DECO: DecoItem[] = [
   { name: 'log', aspect: 1.8626, h: 1.0, weight: 0.06, sway: false },
 ]
 
-// Strand-Deko: die Felsen und das Treibholz aus dem Wald-Blatt passen an eine Bucht,
-// Gras/Blumen/Pilze nicht. Bewusst wiederverwendet, statt den Strand leer zu lassen —
-// eigene Küsten-Objekte (Palme, Muschelfels, Steg) kommen später dazu.
+// Strand-Deko aus dem eigenen Küsten-Sammelblatt (Nutzer-Artwork, 8 Objekte). `aspect`
+// exakt aus `cut-sheet.mjs`; die Welt-Höhe `h` von Hand gesetzt (auf dem Blatt sind alle
+// Objekte etwa gleich groß, im Spiel muss ein Kiesel kleiner sein als der Muschelfels).
+// Strandgras wiegt sich im Wind (`sway`), der Rest steht fest.
 const COAST_DECO: DecoItem[] = [
-  { name: 'pebble', aspect: 1.4605, h: 0.45, weight: 0.3, sway: false },
-  { name: 'stones', aspect: 1.9009, h: 0.6, weight: 0.25, sway: false },
-  { name: 'rock_mid', aspect: 1.3289, h: 1.0, weight: 0.2, sway: false },
-  { name: 'rock_big', aspect: 1.1557, h: 1.8, weight: 0.13, sway: false },
-  { name: 'log', aspect: 1.8626, h: 1.0, weight: 0.12, sway: false },
+  { name: 'coast_pebble', aspect: 1.4718, h: 0.5, weight: 0.24, sway: false },
+  { name: 'shells', aspect: 1.3133, h: 0.42, weight: 0.16, sway: false },
+  { name: 'beachgrass', aspect: 0.7019, h: 1.1, weight: 0.16, sway: true },
+  { name: 'driftwood', aspect: 1.2749, h: 1.0, weight: 0.13, sway: false },
+  { name: 'starfish', aspect: 1.0778, h: 0.4, weight: 0.09, sway: false },
+  { name: 'coast_rock', aspect: 0.871, h: 1.8, weight: 0.09, sway: false },
+  { name: 'barrel', aspect: 1.3057, h: 0.95, weight: 0.07, sway: false },
+  { name: 'post', aspect: 0.4755, h: 1.3, weight: 0.06, sway: false },
 ]
 
 export const STAGE: Record<DecorKind, StageLook> = {
@@ -168,7 +172,9 @@ export const STAGE: Record<DecorKind, StageLook> = {
     // Kein 3D-Wasser: Meer, Brandung und Boote sind im Panorama gemalt. Eine zusätzliche
     // Wasserfläche würde davor schweben — derselbe Fehler wie früher die Wald-Wasserfälle.
     water: 'none',
-    treeArt: [],
+    // Palmen als Baum-Billboards (Nutzer-Artwork). Vorher stand die Küste baumlos da,
+    // obwohl das Panorama voller Palmen ist. Aspect exakt aus `cut-asset.mjs`.
+    treeArt: [{ url: 'art/deco/tree_palm.webp', aspect: 0.6432 }],
     deco: COAST_DECO,
     houseArt: [],
     crown: { hue: 0.28, hueVar: 0.06, sat: 0.55, light: 0.4 },
