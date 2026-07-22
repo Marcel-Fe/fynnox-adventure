@@ -63,7 +63,7 @@ function GameView() {
         key={runId}
         shadows="soft"
         dpr={[1, 2]}
-        camera={{ position: [level.startX, 4.4, 13.5], fov: 48, near: 0.1, far: 600 }}
+        camera={{ position: [level.startX, 4.4, 11], fov: 48, near: 0.1, far: 600 }}
         gl={{ antialias: true }}
       >
         <CameraFollow />

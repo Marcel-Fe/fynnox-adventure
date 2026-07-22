@@ -4,7 +4,7 @@ import { useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
 import { asset } from '../utils/asset'
 import { player } from './playerState'
-import { burst, addShake } from './fx'
+import { addShake } from './fx'
 
 // Fynnox als echtes 3D-Modell (Tripo, gerigt) im 2,5D-Seitenscroller. Auto-skaliert auf
 // Zielhöhe, Füße am Boden, blickt nach +X (Laufrichtung). Bewegung wird prozedural über
@@ -31,7 +31,6 @@ export function FynnoxModel() {
   // Spielgefühl: Squash & Stretch + Staub-Effekte
   const wasGround = useRef(true)
   const squash = useRef(0) // >0 = gestaucht (Landung), <0 = gestreckt (Absprung)
-  const runDust = useRef(0)
 
   const { scaleV, yOff } = useMemo(() => {
     const box = new THREE.Box3().setFromObject(scene)
@@ -94,28 +93,19 @@ export function FynnoxModel() {
       set(bones.spine, 'spine', br)
     }
 
-    // --- Spielgefühl: Absprung / Landung / Laufstaub ---
+    // --- Spielgefühl: Absprung / Landung ---
+    // Staubwolken (Absprung/Landung/Laufen) auf Nutzerwunsch entfernt — sie waren zu
+    // kräftig und wirkten unruhig. Squash & Stretch + ein dezenter Landungs-Rüttler
+    // bleiben, weil sie die Bewegung erden, ohne die Sicht zuzustauben.
     const dt = Math.min(delta, 0.05)
     if (!player.onGround && wasGround.current) {
-      // gerade abgesprungen → strecken + kleine Staubwolke
-      squash.current = -0.55
-      burst('jump', player.x, player.y + 0.15)
+      squash.current = -0.55 // gerade abgesprungen → strecken
     } else if (player.onGround && !wasGround.current) {
-      // gelandet → stauchen, Staub, Rüttler je nach Fallhöhe
       const hard = Math.min(1, Math.abs(player.vy) / 18)
-      squash.current = 0.5 + hard * 0.35
-      burst('land', player.x, player.y + 0.12)
+      squash.current = 0.5 + hard * 0.35 // gelandet → stauchen
       addShake(0.06 + hard * 0.16)
     }
     wasGround.current = player.onGround
-
-    if (running) {
-      runDust.current -= dt
-      if (runDust.current <= 0) {
-        runDust.current = 0.13
-        burst('run', player.x - player.facing * 0.35, player.y + 0.1)
-      }
-    }
 
     squash.current += (0 - squash.current) * Math.min(1, dt * 11) // federt zurück
 

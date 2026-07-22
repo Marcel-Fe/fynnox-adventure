@@ -64,12 +64,12 @@ export function SpriteNpc({ def, id }: { def: NpcDefData; id: number }) {
       </mesh>
 
       {near && def.lines.length > 0 && (
-        <Html position={[0, h + 0.7, 0]} center distanceFactor={14} occlude={false} pointerEvents="none">
+        <Html position={[0, h + 1.5, 0]} center distanceFactor={19} occlude={false} pointerEvents="none">
           <div
             style={{
-              background: '#ffffff', color: '#16213c', borderRadius: 18, padding: '10px 14px',
-              fontFamily: 'system-ui, sans-serif', fontWeight: 600, fontSize: 15, lineHeight: 1.25,
-              width: 210, textAlign: 'center', boxShadow: '0 6px 18px rgba(0,0,0,0.28)',
+              background: '#ffffff', color: '#16213c', borderRadius: 16, padding: '8px 12px',
+              fontFamily: 'system-ui, sans-serif', fontWeight: 600, fontSize: 14, lineHeight: 1.22,
+              width: 176, textAlign: 'center', boxShadow: '0 6px 18px rgba(0,0,0,0.28)',
               border: '3px solid #a3622f', position: 'relative', userSelect: 'none',
             }}
           >

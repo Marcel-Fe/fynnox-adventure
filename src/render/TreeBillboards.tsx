@@ -49,15 +49,17 @@ interface TreeInst {
   flip: boolean
 }
 
-// Tiefen-Bänder. Bewusst LOCKER besetzt (großer `step`) und erst ab z=-11:
-// der gemalte Hintergrund muss zwischen den Stämmen sichtbar bleiben — vorher haben
-// dichte, riesige Bäume das Artwork des Nutzers komplett zugestellt.
-// `shade`: fernere Bänder werden aufgehellt und entsättigt → Luftperspektive wie im Artwork.
+// Tiefen-Bänder. Auf Nutzerwunsch DICHTER besetzt („sieht noch nicht nach Wald aus"):
+// die Stämme stehen jetzt näher beieinander und in mehr Reihen. Zwischen den Bäumen
+// bleibt der gemalte Hintergrund am Horizont trotzdem sichtbar, weil die fernen Bänder
+// kleiner und heller sind (`shade` → Luftperspektive). Alle Bäume ab z=-9, also HINTER
+// der Spielachse (z=0) — sie verdecken Fynnox und die Sicht nicht.
 const BANDS = [
-  { z: -11, step: 38, h: [10, 13], shade: 1.0 },
-  { z: -19, step: 25, h: [8, 10.5], shade: 0.93 },
-  { z: -30, step: 21, h: [6.5, 8.5], shade: 0.84 },
-  { z: -44, step: 27, h: [5, 7], shade: 0.74 },
+  { z: -9, step: 16, h: [8.5, 11.5], shade: 1.0 },
+  { z: -15, step: 12, h: [7.5, 10], shade: 0.95 },
+  { z: -22, step: 10, h: [6.5, 8.5], shade: 0.88 },
+  { z: -31, step: 11, h: [5.5, 7.5], shade: 0.8 },
+  { z: -42, step: 14, h: [4.5, 6.5], shade: 0.72 },
 ]
 
 function useTrees(minX: number, maxX: number, count: number): TreeInst[][] {

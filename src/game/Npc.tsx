@@ -116,18 +116,18 @@ export function Npc({ def, quest }: { def: NpcDef; quest: NpcQuest }) {
         <primitive object={model} />
       </group>
       {near && (
-        <Html position={[0, TARGET_H + 0.9, 0]} center distanceFactor={14} occlude={false} pointerEvents="none">
+        <Html position={[0, TARGET_H + 1.6, 0]} center distanceFactor={19} occlude={false} pointerEvents="none">
           <div
             style={{
               background: '#ffffff',
               color: '#16213c',
-              borderRadius: 18,
-              padding: '10px 14px',
+              borderRadius: 16,
+              padding: '8px 12px',
               fontFamily: 'system-ui, sans-serif',
               fontWeight: 600,
-              fontSize: 15,
-              lineHeight: 1.25,
-              width: 220,
+              fontSize: 14,
+              lineHeight: 1.22,
+              width: 176,
               textAlign: 'center',
               boxShadow: '0 6px 18px rgba(0,0,0,0.28)',
               border: `3px solid ${bubbleColor}`,
