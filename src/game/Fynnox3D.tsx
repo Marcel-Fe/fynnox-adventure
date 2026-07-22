@@ -113,8 +113,10 @@ export function FynnoxModel() {
     const bob = running ? Math.abs(Math.sin(time * 10)) * 0.08 : Math.sin(time * 2) * 0.03
     o.position.y = yOff + bob
     o.rotation.y = BASE_ROT + (player.facing === 1 ? 0 : Math.PI)
+    // Squash & Stretch bewusst DEZENT (vorher 0.42/0.5 → wirkte gummiartig). Ein leichter
+    // Anteil erdet Sprung/Landung, ohne dass Fynnox wie Kaugummi verformt — realistischer.
     const sq = squash.current
-    o.scale.set(scaleV * (1 + sq * 0.42), scaleV * (1 - sq * 0.5), scaleV * (1 + sq * 0.42))
+    o.scale.set(scaleV * (1 + sq * 0.2), scaleV * (1 - sq * 0.26), scaleV * (1 + sq * 0.2))
   })
 
   return (
